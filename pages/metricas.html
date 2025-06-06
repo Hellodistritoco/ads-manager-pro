@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Métricas - ADS Manager Pro 3</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../css/main.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--dark-color) 0%, #334155 100%);
+            color: white;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            margin: 0.25rem 1rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 20px;
+        }
+
+        .top-bar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .breadcrumb {
+            background: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .breadcrumb-item {
+            color: var(--secondary-color);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        /* Page specific styles */
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .metrics-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .upload-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--primary-color);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary-color);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #e2e8f0;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .metrics-table-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .table-header {
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 300px;
+            flex: 1;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+        }
+
+        .table {
+            margin: 0;
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: var(--dark-color);
+            background-color: #f8fafc;
+            padding: 1rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .metric-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .metric-details h6 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .metric-details small {
+            color: var(--secondary-color);
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        /* Chart containers */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 0;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .metrics-summary {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .page-header {
+                padding: 1rem;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading states */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--secondary-color);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* File upload styles */
+        .file-info {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .file-size {
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .status-processing {
+            background-color: rgba(217, 119, 6, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-completed {
+            background-color: rgba(5, 150, 105, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-error {
+            background-color: rgba(220, 38, 38, 0.1);
+            color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4 class="mb-0">
+                <i class="bi bi-bullseye"></i> ADS Manager Pro 3
+            </h4>
+            <small class="text-muted">v3.0.0</small>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-item">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="cliente.html" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Clientes</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="estrategia.html" class="nav-link">
+                    <i class="bi bi-lightbulb"></i>
+                    <span>Estrategias</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="metricas.html" class="nav-link active">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Métricas</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="optimizacion.html" class="nav-link">
+                    <i class="bi bi-gear"></i>
+                    <span>Optimización</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="resultados.html" class="nav-link">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Resultados</span>
+                </a>
+            </div>
+            
+            <hr class="my-3 mx-3" style="border-color: rgba(255, 255, 255, 0.2);">
+            
+            <div class="nav-item">
+                <a href="../index.html" class="nav-link">
+                    <i class="bi bi-house"></i>
+                    <span>Inicio</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-secondary d-md-none" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Métricas</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-primary" onclick="refreshMetrics()">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                </button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                    <i class="bi bi-upload"></i> Subir CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="container-fluid p-4">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="h3 mb-2">Análisis de Métricas</h1>
+                        <p class="text-muted mb-0">Sube archivos CSV y obtén análisis automáticos de tus campañas publicitarias</p>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">Total de reportes: <span id="totalMetricsCount">--</span></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Summary -->
+            <div class="metrics-summary">
+                <div class="metric-card">
+                    <div class="metric-value" id="totalInvestmentValue">--</div>
+                    <div class="metric-label">Inversión Total</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="totalRevenueValue">--</div>
+                    <div class="metric-label">Ingresos Totales</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avgRoasValue">--</div>
+                    <div class="metric-label">ROAS Promedio</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avgCtrValue">--</div>
+                    <div class="metric-label">CTR Promedio</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="row g-4 mb-4">
+                <!-- Performance Chart -->
+                <div class="col-lg-8">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h6 class="chart-title">Rendimiento por Período</h6>
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="chartMetric" id="chartRoas" checked>
+                                <label class="btn btn-outline-primary btn-sm" for="chartRoas">ROAS</label>
+                                
+                                <input type="radio" class="btn-check" name="chartMetric" id="chartCtr">
+                                <label class="btn btn-outline-primary btn-sm" for="chartCtr">CTR</label>
+                                
+                                <input type="radio" class="btn-check" name="chartMetric" id="chartCpm">
+                                <label class="btn btn-outline-primary btn-sm" for="chartCpm">CPM</label>
+                            </div>
+                        </div>
+                        <canvas id="performanceChart" height="300"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Investment vs Revenue -->
+                <div class="col-lg-4">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h6 class="chart-title">Inversión vs Ingresos</h6>
+                        </div>
+                        <canvas id="investmentChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Table -->
+            <div class="metrics-table-card">
+                <div class="table-header">
+                    <h5 class="mb-0">Reportes de Métricas</h5>
+                    <div class="d-flex gap-3 align-items-center">
+                        <div class="search-box">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="form-control" placeholder="Buscar reportes..." id="searchInput">
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="bi bi-funnel"></i> Filtrar
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('all')">Todos</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('completado')">Completados</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('procesando')">Procesando</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByPeriod('week')">Esta semana</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByPeriod('month')">Este mes</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive" style="position: relative;">
+                    <div class="loading-overlay d-none" id="tableLoading">
+                        <div class="spinner"></div>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Reporte</th>
+                                <th>Cliente</th>
+                                <th>Período</th>
+                                <th>Inversión</th>
+                                <th>Ingresos</th>
+                                <th>ROAS</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="metricsTableBody">
+                            <!-- Content will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-upload"></i> Subir Archivo CSV
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadForm">
+                        <div class="row g-3">
+                            <!-- Información del Reporte -->
+                            <div class="col-12">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-info-circle"></i> Información del Reporte
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="clienteId" required>
+                                        <option value="">Seleccionar cliente</option>
+                                    </select>
+                                    <label for="clienteId">Cliente *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="estrategiaId">
+                                        <option value="">Seleccionar estrategia (opcional)</option>
+                                    </select>
+                                    <label for="estrategiaId">Estrategia</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="fechaInicio" required>
+                                    <label for="fechaInicio">Fecha Inicio *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="fechaFin" required>
+                                    <label for="fechaFin">Fecha Fin *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="periodo" placeholder="Ej: Enero 2024, Q1 2024">
+                                    <label for="periodo">Período/Descripción</label>
+                                </div>
+                            </div>
+
+                            <!-- Upload Zone -->
+                            <div class="col-12 mt-4">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-file-earmark-spreadsheet"></i> Archivo CSV
+                                </h6>
+                                
+                                <div class="upload-zone" id="uploadZone">
+                                    <div class="upload-icon">
+                                        <i class="bi bi-cloud-upload"></i>
+                                    </div>
+                                    <h6>Arrastra tu archivo CSV aquí</h6>
+                                    <p class="text-muted mb-3">o haz click para seleccionar</p>
+                                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('csvFile').click()">
+                                        <i class="bi bi-folder2-open"></i> Seleccionar Archivo
+                                    </button>
+                                    <input type="file" id="csvFile" accept=".csv" style="display: none;">
+                                    
+                                    <div class="mt-3">
+                                        <small class="text-muted">
+                                            <strong>Formatos soportados:</strong> CSV (máximo 10MB)<br>
+                                            <strong>Columnas esperadas:</strong> Impresiones, Clicks, Conversiones, Costo, Ingresos, Fecha
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <div id="fileInfo" class="file-info d-none">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="file-name" id="fileName"></div>
+                                            <div class="file-size" id="fileSize"></div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile()">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                    <div class="progress mt-2 d-none" id="uploadProgress">
+                                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="uploadCSV()" id="uploadBtn" disabled>
+                        <i class="bi bi-upload"></i> Subir y Procesar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Variables globales
+        let metricsData = [];
+        let clientesData = [];
+        let estrategiasData = [];
+        let performanceChart, investmentChart;
+        let selectedFile = null;
+
+        // API Client simplificado
+        const api = {
+            baseUrl: '../api/',
+            
+            async getMetricas() {
+                try {
+                    const response = await fetch(`${this.baseUrl}metricas`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener métricas:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async getClientes() {
+                try {
+                    const response = await fetch(`${this.baseUrl}clientes`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener clientes:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async getEstrategias() {
+                try {
+                    const response = await fetch(`${this.baseUrl}estrategias`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener estrategias:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async uploadCSV(formData) {
+                try {
+                    const response = await fetch(`${this.baseUrl}metricas/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al subir CSV:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async deleteMetrica(id) {
+                try {
+                    const response = await fetch(`${this.baseUrl}metricas/${id}`, {
+                        method: 'DELETE'
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al eliminar métrica:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            }
+        };
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSidebar();
+            loadInitialData();
+            initializeCharts();
+            setupFileUpload();
+            setupSearch();
+        });
+
+        // Sidebar functionality
+        function initializeSidebar() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                        sidebar.classList.remove('show');
+                    }
+                }
+            });
+        }
+
+        // Cargar datos iniciales
+        async function loadInitialData() {
+            try {
+                showTableLoading(true);
+                
+                // Cargar datos en paralelo
+                const [metricsResponse, clientsResponse, strategiesResponse] = await Promise.all([
+                    api.getMetricas(),
+                    api.getClientes(),
+                    api.getEstrategias()
+                ]);
+                
+                if (metricsResponse.success) {
+                    metricsData = metricsResponse.data;
+                    updateMetricsSummary();
+                    renderMetricsTable();
+                    updateChartsData();
+                }
+                
+                if (clientsResponse.success) {
+                    clientesData = clientsResponse.data;
+                    populateClientSelect();
+                }
+                
+                if (strategiesResponse.success) {
+                    estrategiasData = strategiesResponse.data;
+                    populateStrategySelect();
+                }
+                
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+                showError('Error al cargar los datos');
+                renderEmptyState();
+            } finally {
+                showTableLoading(false);
+            }
+        }
+
+        // Actualizar resumen de métricas
+        function updateMetricsSummary() {
+            const totalInvestment = metricsData.reduce((sum, m) => sum + (parseFloat(m.inversion_total) || 0), 0);
+            const totalRevenue = metricsData.reduce((sum, m) => sum + (parseFloat(m.ingresos_total) || 0), 0);
+            const avgRoas = metricsData.length > 0 ? 
+                metricsData.reduce((sum, m) => sum + (parseFloat(m.roas) || 0), 0) / metricsData.length : 0;
+            const avgCtr = metricsData.length > 0 ? 
+                metricsData.reduce((sum, m) => sum + (parseFloat(m.ctr) || 0), 0) / metricsData.length : 0;
+
+            document.getElementById('totalMetricsCount').textContent = metricsData.length;
+            document.getElementById('totalInvestmentValue').textContent = formatCurrency(totalInvestment);
+            document.getElementById('totalRevenueValue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('avgRoasValue').textContent = formatNumber(avgRoas, 2) + 'x';
+            document.getElementById('avgCtrValue').textContent = formatNumber(avgCtr, 2) + '%';
+        }
+
+        // Renderizar tabla de métricas
+        function renderMetricsTable() {
+            const tbody = document.getElementById('metricsTableBody');
+            
+            if (metricsData.length === 0) {
+                renderEmptyState();
+                return;
+            }
+            
+            tbody.innerHTML = metricsData.map(metric => `
+                <tr>
+                    <td>
+                        <div class="metric-info">
+                            <div class="metric-icon">
+                                <i class="bi bi-file-earmark-spreadsheet"></i>
+                            </div>
+                            <div class="metric-details">
+                                <h6>${metric.nombre_archivo || 'Reporte CSV'}</h6>
+                                <small>${metric.periodo || 'Sin período'}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${metric.cliente_nombre || 'N/A'}</td>
+                    <td>
+                        <div>
+                            <small class="text-muted">Inicio:</small> ${formatDate(metric.fecha_inicio)}<br>
+                            <small class="text-muted">Fin:</small> ${formatDate(metric.fecha_fin)}
+                        </div>
+                    </td>
+                    <td>${formatCurrency(metric.inversion_total || 0)}</td>
+                    <td>${formatCurrency(metric.ingresos_total || 0)}</td>
+                    <td>
+                        <span class="fw-bold ${getRoasColor(metric.roas || 0)}">
+                            ${formatNumber(metric.roas || 0, 2)}x
+                        </span>
+                    </td>
+                    <td>${getStatusBadge(metric.estado_procesamiento)}</td>
+                    <td>${formatDate(metric.fecha_subida)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewMetric(${metric.id})" title="Ver detalles">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="recalculateMetric(${metric.id})" title="Recalcular">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteMetric(${metric.id})" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Renderizar estado vacío
+        function renderEmptyState() {
+            const tbody = document.getElementById('metricsTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9">
+                        <div class="empty-state">
+                            <i class="bi bi-bar-chart"></i>
+                            <h5>No hay métricas registradas</h5>
+                            <p>Sube tu primer archivo CSV para comenzar a analizar el rendimiento de tus campañas</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                <i class="bi bi-upload"></i> Subir Primer CSV
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Poblar select de clientes
+        function populateClientSelect() {
+            const select = document.getElementById('clienteId');
+            select.innerHTML = '<option value="">Seleccionar cliente</option>';
+            
+            clientesData.filter(c => c.activo).forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = `${client.nombre} ${client.empresa ? '- ' + client.empresa : ''}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Poblar select de estrategias
+        function populateStrategySelect() {
+            const select = document.getElementById('estrategiaId');
+            select.innerHTML = '<option value="">Seleccionar estrategia (opcional)</option>';
+            
+            estrategiasData.forEach(strategy => {
+                const option = document.createElement('option');
+                option.value = strategy.id;
+                option.textContent = strategy.nombre_estrategia;
+                option.dataset.clienteId = strategy.cliente_id;
+                select.appendChild(option);
+            });
+
+            // Filtrar estrategias por cliente seleccionado
+            document.getElementById('clienteId').addEventListener('change', function() {
+                const clienteId = this.value;
+                const strategySelect = document.getElementById('estrategiaId');
+                const options = strategySelect.querySelectorAll('option');
+                
+                options.forEach(option => {
+                    if (option.value === '') {
+                        option.style.display = 'block';
+                    } else {
+                        option.style.display = option.dataset.clienteId === clienteId ? 'block' : 'none';
+                    }
+                });
+                
+                strategySelect.value = '';
+            });
+        }
+
+        // Inicializar gráficos
+        function initializeCharts() {
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'ROAS',
+                        data: [],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+
+            // Investment Chart
+            const investmentCtx = document.getElementById('investmentChart').getContext('2d');
+            investmentChart = new Chart(investmentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Inversión', 'Ingresos'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#dc2626', '#059669']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Event listeners para cambio de métrica
+            document.querySelectorAll('input[name="chartMetric"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    updateChartsData();
+                });
+            });
+        }
+
+        // Actualizar datos de gráficos
+        function updateChartsData() {
+            if (metricsData.length === 0) return;
+
+            // Obtener métrica seleccionada
+            const selectedMetric = document.querySelector('input[name="chartMetric"]:checked').id.replace('chart', '').toLowerCase();
+            
+            // Preparar datos para gráfico de rendimiento
+            const labels = metricsData.map(m => m.periodo || formatDate(m.fecha_inicio));
+            let data, label;
+            
+            switch (selectedMetric) {
+                case 'roas':
+                    data = metricsData.map(m => parseFloat(m.roas) || 0);
+                    label = 'ROAS';
+                    break;
+                case 'ctr':
+                    data = metricsData.map(m => parseFloat(m.ctr) || 0);
+                    label = 'CTR (%)';
+                    break;
+                case 'cpm':
+                    data = metricsData.map(m => parseFloat(m.cpm) || 0);
+                    label = 'CPM ($)';
+                    break;
+                default:
+                    data = metricsData.map(m => parseFloat(m.roas) || 0);
+                    label = 'ROAS';
+            }
+
+            performanceChart.data.labels = labels;
+            performanceChart.data.datasets[0].data = data;
+            performanceChart.data.datasets[0].label = label;
+            performanceChart.update();
+
+            // Actualizar gráfico de inversión
+            const totalInvestment = metricsData.reduce((sum, m) => sum + (parseFloat(m.inversion_total) || 0), 0);
+            const totalRevenue = metricsData.reduce((sum, m) => sum + (parseFloat(m.ingresos_total) || 0), 0);
+            
+            investmentChart.data.datasets[0].data = [totalInvestment, totalRevenue];
+            investmentChart.update();
+        }
+
+        // Configurar upload de archivos
+        function setupFileUpload() {
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('csvFile');
+
+            // Drag & Drop
+            uploadZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            // Click to select
+            uploadZone.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    handleFileSelect(this.files[0]);
+                }
+            });
+        }
+
+        // Manejar selección de archivo
+        function handleFileSelect(file) {
+            // Validar archivo
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Archivo no válido',
+                    text: 'Por favor selecciona un archivo CSV válido'
+                });
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Archivo muy grande',
+                    text: 'El archivo no puede ser mayor a 10MB'
+                });
+                return;
+            }
+
+            selectedFile = file;
+            
+            // Mostrar información del archivo
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').classList.remove('d-none');
+            document.getElementById('uploadBtn').disabled = false;
+        }
+
+        // Remover archivo seleccionado
+        function removeFile() {
+            selectedFile = null;
+            document.getElementById('csvFile').value = '';
+            document.getElementById('fileInfo').classList.add('d-none');
+            document.getElementById('uploadBtn').disabled = true;
+        }
+
+        // Subir CSV
+        async function uploadCSV() {
+            if (!selectedFile) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Sin archivo',
+                    text: 'Por favor selecciona un archivo CSV'
+                });
+                return;
+            }
+
+            const form = document.getElementById('uploadForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            try {
+                // Preparar FormData
+                const formData = new FormData();
+                formData.append('csv_file', selectedFile);
+                formData.append('cliente_id', document.getElementById('clienteId').value);
+                formData.append('estrategia_id', document.getElementById('estrategiaId').value);
+                formData.append('fecha_inicio', document.getElementById('fechaInicio').value);
+                formData.append('fecha_fin', document.getElementById('fechaFin').value);
+                formData.append('periodo', document.getElementById('periodo').value);
+
+                // Mostrar progreso
+                const uploadBtn = document.getElementById('uploadBtn');
+                const originalText = uploadBtn.innerHTML;
+                uploadBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+                uploadBtn.disabled = true;
+
+                document.getElementById('uploadProgress').classList.remove('d-none');
+                simulateProgress();
+
+                // Subir archivo
+                const result = await api.uploadCSV(formData);
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Archivo procesado',
+                        text: 'El archivo CSV se ha procesado exitosamente',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    // Cerrar modal y recargar datos
+                    bootstrap.Modal.getInstance(document.getElementById('uploadModal')).hide();
+                    loadInitialData();
+                    resetUploadForm();
+                } else {
+                    throw new Error(result.message);
+                }
+
+            } catch (error) {
+                console.error('Error uploading CSV:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Error al procesar el archivo CSV'
+                });
+            } finally {
+                // Restaurar botón
+                const uploadBtn = document.getElementById('uploadBtn');
+                uploadBtn.innerHTML = '<i class="bi bi-upload"></i> Subir y Procesar';
+                uploadBtn.disabled = false;
+                document.getElementById('uploadProgress').classList.add('d-none');
+            }
+        }
+
+        // Simular progreso de subida
+        function simulateProgress() {
+            const progressBar = document.querySelector('#uploadProgress .progress-bar');
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 95) {
+                    progress = 95;
+                    clearInterval(interval);
+                }
+                progressBar.style.width = progress + '%';
+            }, 200);
+        }
+
+        // Reset form de upload
+        function resetUploadForm() {
+            document.getElementById('uploadForm').reset();
+            removeFile();
+            document.getElementById('uploadProgress').classList.add('d-none');
+            document.querySelector('#uploadProgress .progress-bar').style.width = '0%';
+        }
+
+        // Configurar búsqueda
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                const term = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#metricsTableBody tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(term) ? '' : 'none';
+                });
+            });
+        }
+
+        // Ver detalles de métrica
+        async function viewMetric(metricId) {
+            const metric = metricsData.find(m => m.id === metricId);
+            if (!metric) return;
+
+            Swal.fire({
+                title: metric.nombre_archivo || 'Reporte de Métricas',
+                html: `
+                    <div class="text-start">
+                        <h6>Información General</h6>
+                        <p><strong>Cliente:</strong> ${metric.cliente_nombre || 'N/A'}</p>
+                        <p><strong>Período:</strong> ${metric.periodo || 'N/A'}</p>
+                        <p><strong>Fechas:</strong> ${formatDate(metric.fecha_inicio)} - ${formatDate(metric.fecha_fin)}</p>
+                        <p><strong>Archivo:</strong> ${metric.nombre_archivo} (${formatFileSize(metric.tamano_archivo || 0)})</p>
+                        
+                        <hr>
+                        <h6>Métricas Calculadas</h6>
+                        <div class="row g-2">
+                            <div class="col-6"><strong>Impresiones:</strong> ${formatNumber(metric.total_impresiones || 0)}</div>
+                            <div class="col-6"><strong>Clicks:</strong> ${formatNumber(metric.total_clicks || 0)}</div>
+                            <div class="col-6"><strong>Conversiones:</strong> ${formatNumber(metric.total_conversiones || 0)}</div>
+                            <div class="col-6"><strong>CTR:</strong> ${formatNumber(metric.ctr || 0, 2)}%</div>
+                            <div class="col-6"><strong>CPM:</strong> ${formatCurrency(metric.cpm || 0)}</div>
+                            <div class="col-6"><strong>CPC:</strong> ${formatCurrency(metric.cpc || 0)}</div>
+                            <div class="col-6"><strong>Inversión:</strong> ${formatCurrency(metric.inversion_total || 0)}</div>
+                            <div class="col-6"><strong>Ingresos:</strong> ${formatCurrency(metric.ingresos_total || 0)}</div>
+                            <div class="col-12"><strong>ROAS:</strong> <span class="${getRoasColor(metric.roas || 0)}">${formatNumber(metric.roas || 0, 2)}x</span></div>
+                        </div>
+                    </div>
+                `,
+                width: 600,
+                showConfirmButton: false,
+                showCloseButton: true
+            });
+        }
+
+        // Recalcular métricas
+        async function recalculateMetric(metricId) {
+            try {
+                const result = await Swal.fire({
+                    title: '¿Recalcular métricas?',
+                    text: 'Esto volverá a procesar los datos del archivo CSV',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, recalcular',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (result.isConfirmed) {
+                    const response = await fetch(`../api/metricas/${metricId}/recalcular`, {
+                        method: 'POST'
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Métricas recalculadas',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        
+                        loadInitialData();
+                    } else {
+                        throw new Error(data.message);
+                    }
+                }
+            } catch (error) {
+                console.error('Error recalculating metrics:', error);
+                showError('Error al recalcular las métricas');
+            }
+        }
+
+        // Eliminar métrica
+        async function deleteMetric(metricId) {
+            try {
+                const result = await Swal.fire({
+                    title: '¿Eliminar reporte?',
+                    text: 'Esta acción no se puede deshacer',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#dc2626'
+                });
+
+                if (result.isConfirmed) {
+                    const response = await api.deleteMetrica(metricId);
+
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Reporte eliminado',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        
+                        loadInitialData();
+                    } else {
+                        throw new Error(response.message);
+                    }
+                }
+            } catch (error) {
+                console.error('Error deleting metric:', error);
+                showError('Error al eliminar el reporte');
+            }
+        }
+
+        // Filtros
+        function filterByStatus(status) {
+            const rows = document.querySelectorAll('#metricsTableBody tr');
+            
+            rows.forEach(row => {
+                if (status === 'all') {
+                    row.style.display = '';
+                } else {
+                    const statusCell = row.querySelector('td:nth-child(7)');
+                    const hasStatus = statusCell && statusCell.textContent.toLowerCase().includes(status);
+                    row.style.display = hasStatus ? '' : 'none';
+                }
+            });
+        }
+
+        function filterByPeriod(period) {
+            // Implementar filtro por período según necesidades
+            console.log('Filter by period:', period);
+        }
+
+        // Actualizar métricas
+        function refreshMetrics() {
+            loadInitialData();
+        }
+
+        // Reset modal al cerrar
+        document.getElementById('uploadModal').addEventListener('hidden.bs.modal', resetUploadForm);
+
+        // Utility functions
+        function showTableLoading(show) {
+            const loading = document.getElementById('tableLoading');
+            if (show) {
+                loading.classList.remove('d-none');
+            } else {
+                loading.classList.add('d-none');
+            }
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message
+            });
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'completado': '<span class="status-badge status-completed">Completado</span>',
+                'procesando': '<span class="status-badge status-processing">Procesando</span>',
+                'error': '<span class="status-badge status-error">Error</span>'
+            };
+            return badges[status] || '<span class="status-badge status-processing">Pendiente</span>';
+        }
+
+        function getRoasColor(roas) {
+            if (roas >= 4) return 'text-success';
+            if (roas >= 2) return 'text-primary';
+            if (roas >= 1) return 'text-warning';
+            return 'text-danger';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function formatNumber(number, decimals = 0) {
+            return new Intl.NumberFormat('es-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }).format(number);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>

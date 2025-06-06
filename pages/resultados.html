@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados - ADS Manager Pro 3</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../css/main.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--dark-color) 0%, #334155 100%);
+            color: white;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            margin: 0.25rem 1rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 20px;
+        }
+
+        .top-bar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .breadcrumb {
+            background: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .breadcrumb-item {
+            color: var(--secondary-color);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        /* Page specific styles */
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Performance Summary Cards */
+        .performance-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .performance-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .performance-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .performance-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #1d4ed8);
+        }
+
+        .performance-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .performance-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .performance-label {
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .performance-change {
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .performance-change.positive {
+            color: var(--success-color);
+        }
+
+        .performance-change.negative {
+            color: var(--danger-color);
+        }
+
+        .performance-change.neutral {
+            color: var(--secondary-color);
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 0;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .period-btn {
+            background: none;
+            border: 1px solid #e2e8f0;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            color: var(--secondary-color);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .period-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .period-btn:hover:not(.active) {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Client Reports Section */
+        .client-reports {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+
+        .reports-header {
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .client-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .client-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .client-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .client-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .client-info h6 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .client-info small {
+            color: var(--secondary-color);
+        }
+
+        .client-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .client-status.active {
+            background-color: rgba(5, 150, 105, 0.1);
+            color: var(--success-color);
+        }
+
+        .client-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-item {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--secondary-color);
+        }
+
+        .client-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        /* Export Section */
+        .export-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .export-option {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--dark-color);
+        }
+
+        .export-option:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+        }
+
+        .export-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .export-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .export-description {
+            font-size: 0.75rem;
+            color: var(--secondary-color);
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .comparison-header {
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table {
+            margin: 0;
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: var(--dark-color);
+            background-color: #f8fafc;
+            padding: 1rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .metric-comparison {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .trend-indicator {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            background-color: rgba(5, 150, 105, 0.1);
+            color: var(--success-color);
+        }
+
+        .trend-down {
+            background-color: rgba(220, 38, 38, 0.1);
+            color: var(--danger-color);
+        }
+
+        .trend-stable {
+            background-color: rgba(100, 116, 139, 0.1);
+            color: var(--secondary-color);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .performance-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .client-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .export-options {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                padding: 1rem;
+            }
+        }
+
+        /* Loading states */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--secondary-color);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4 class="mb-0">
+                <i class="bi bi-bullseye"></i> ADS Manager Pro 3
+            </h4>
+            <small class="text-muted">v3.0.0</small>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-item">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="cliente.html" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Clientes</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="estrategia.html" class="nav-link">
+                    <i class="bi bi-lightbulb"></i>
+                    <span>Estrategias</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="metricas.html" class="nav-link">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Métricas</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="optimizacion.html" class="nav-link">
+                    <i class="bi bi-gear"></i>
+                    <span>Optimización</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="resultados.html" class="nav-link active">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Resultados</span>
+                </a>
+            </div>
+            
+            <hr class="my-3 mx-3" style="border-color: rgba(255, 255, 255, 0.2);">
+            
+            <div class="nav-item">
+                <a href="../index.html" class="nav-link">
+                    <i class="bi bi-house"></i>
+                    <span>Inicio</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-secondary d-md-none" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Resultados</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-primary" onclick="refreshResults()">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-download"></i> Exportar
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportToPDF()">
+                            <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportToExcel()">
+                            <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportToCSV()">
+                            <i class="bi bi-file-earmark-csv"></i> Exportar CSV
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="container-fluid p-4">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="h3 mb-2">Análisis de Resultados</h1>
+                        <p class="text-muted mb-0">Reportes consolidados de rendimiento, análisis comparativo y generación de insights</p>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">Última actualización: <span id="lastUpdate">--</span></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="filter-section">
+                <h6 class="mb-3">
+                    <i class="bi bi-funnel"></i> Filtros de Análisis
+                </h6>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="form-label fw-bold">Período</label>
+                        <select class="form-select" id="periodFilter">
+                            <option value="month">Este mes</option>
+                            <option value="quarter">Este trimestre</option>
+                            <option value="semester">Este semestre</option>
+                            <option value="year">Este año</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label fw-bold">Cliente</label>
+                        <select class="form-select" id="clientFilter">
+                            <option value="all">Todos los clientes</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label fw-bold">Segmento</label>
+                        <select class="form-select" id="segmentFilter">
+                            <option value="all">Todos los segmentos</option>
+                            <option value="e-commerce">E-commerce</option>
+                            <option value="servicios">Servicios</option>
+                            <option value="tecnologia">Tecnología</option>
+                            <option value="salud">Salud</option>
+                            <option value="educacion">Educación</option>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <i class="bi bi-search"></i> Aplicar
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Summary -->
+            <div class="performance-summary">
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: linear-gradient(135deg, var(--primary-color), #1d4ed8);">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <div class="performance-value" id="totalInvestment">--</div>
+                    <div class="performance-label">Inversión Total</div>
+                    <div class="performance-change positive" id="investmentChange">
+                        <i class="bi bi-arrow-up"></i> +15% vs período anterior
+                    </div>
+                </div>
+                
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: linear-gradient(135deg, var(--success-color), #047857);">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="performance-value" id="totalRevenue">--</div>
+                    <div class="performance-label">Ingresos Generados</div>
+                    <div class="performance-change positive" id="revenueChange">
+                        <i class="bi bi-arrow-up"></i> +28% vs período anterior
+                    </div>
+                </div>
+                
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: linear-gradient(135deg, var(--warning-color), #c2410c);">
+                        <i class="bi bi-target"></i>
+                    </div>
+                    <div class="performance-value" id="averageROAS">--</div>
+                    <div class="performance-label">ROAS Promedio</div>
+                    <div class="performance-change positive" id="roasChange">
+                        <i class="bi bi-arrow-up"></i> +12% vs período anterior
+                    </div>
+                </div>
+                
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: linear-gradient(135deg, var(--danger-color), #b91c1c);">
+                        <i class="bi bi-mouse"></i>
+                    </div>
+                    <div class="performance-value" id="averageCTR">--</div>
+                    <div class="performance-label">CTR Promedio</div>
+                    <div class="performance-change neutral" id="ctrChange">
+                        <i class="bi bi-dash"></i> Estable vs período anterior
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <!-- Main Performance Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h6 class="chart-title">Tendencia de Rendimiento</h6>
+                        <div class="chart-controls">
+                            <button class="period-btn active" onclick="changeChartPeriod('6months', this)">6M</button>
+                            <button class="period-btn" onclick="changeChartPeriod('year', this)">1A</button>
+                            <button class="period-btn" onclick="changeChartPeriod('all', this)">Todo</button>
+                        </div>
+                    </div>
+                    <canvas id="performanceChart" height="300"></canvas>
+                </div>
+
+                <!-- ROAS Distribution -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h6 class="chart-title">Distribución por ROAS</h6>
+                    </div>
+                    <canvas id="roasDistributionChart" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- Comparison Table -->
+            <div class="comparison-table">
+                <div class="comparison-header">
+                    <h6 class="mb-0">Comparativa de Clientes</h6>
+                    <button class="btn btn-sm btn-outline-primary" onclick="showDetailedComparison()">
+                        <i class="bi bi-arrows-expand"></i> Vista Detallada
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Inversión</th>
+                                <th>Ingresos</th>
+                                <th>ROAS</th>
+                                <th>CTR</th>
+                                <th>Conversiones</th>
+                                <th>Tendencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Client Reports Grid -->
+            <div class="client-reports">
+                <div class="reports-header">
+                    <h6 class="mb-0">Reportes por Cliente</h6>
+                    <button class="btn btn-sm btn-primary" onclick="generateAllReports()">
+                        <i class="bi bi-file-earmark-plus"></i> Generar Todos los Reportes
+                    </button>
+                </div>
+                <div class="client-grid" id="clientReportsGrid">
+                    <!-- Client cards will be loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Export Section -->
+            <div class="export-section">
+                <h6 class="mb-3">
+                    <i class="bi bi-download"></i> Opciones de Exportación
+                </h6>
+                <p class="text-muted mb-3">Genera reportes personalizados en diferentes formatos para análisis offline o presentaciones</p>
+                
+                <div class="export-options">
+                    <div class="export-option" onclick="exportExecutiveSummary()">
+                        <i class="bi bi-file-earmark-text export-icon"></i>
+                        <div class="export-title">Resumen Ejecutivo</div>
+                        <div class="export-description">Reporte consolidado de alto nivel</div>
+                    </div>
+                    
+                    <div class="export-option" onclick="exportDetailedAnalysis()">
+                        <i class="bi bi-file-earmark-bar-graph export-icon"></i>
+                        <div class="export-title">Análisis Detallado</div>
+                        <div class="export-description">Métricas completas por cliente</div>
+                    </div>
+                    
+                    <div class="export-option" onclick="exportPerformanceReport()">
+                        <i class="bi bi-graph-up export-icon"></i>
+                        <div class="export-title">Reporte de Rendimiento</div>
+                        <div class="export-description">Análisis de tendencias y comparativas</div>
+                    </div>
+                    
+                    <div class="export-option" onclick="exportOptimizationReport()">
+                        <i class="bi bi-gear export-icon"></i>
+                        <div class="export-title">Reporte de Optimizaciones</div>
+                        <div class="export-description">Estado y resultados de mejoras</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Comparison Modal -->
+    <div class="modal fade" id="detailedComparisonModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Análisis Comparativo Detallado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Métrica Principal</label>
+                            <select class="form-select" id="comparisonMetric">
+                                <option value="roas">ROAS</option>
+                                <option value="revenue">Ingresos</option>
+                                <option value="investment">Inversión</option>
+                                <option value="ctr">CTR</option>
+                                <option value="conversions">Conversiones</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Período de Comparación</label>
+                            <select class="form-select" id="comparisonPeriod">
+                                <option value="month">Mes actual vs anterior</option>
+                                <option value="quarter">Trimestre actual vs anterior</option>
+                                <option value="year">Año actual vs anterior</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="height: 400px;">
+                        <canvas id="detailedComparisonChart"></canvas>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" onclick="exportComparisonChart()">
+                        <i class="bi bi-download"></i> Exportar Gráfico
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual Client Report Modal -->
+    <div class="modal fade" id="clientReportModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="clientReportTitle">Reporte de Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Client Info -->
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Información del Cliente</h6>
+                                </div>
+                                <div class="card-body" id="clientInfoContent">
+                                    <!-- Content loaded dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Performance Metrics -->
+                        <div class="col-md-8">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Métricas de Rendimiento</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row" id="clientMetricsContent">
+                                        <!-- Content loaded dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Client Performance Chart -->
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Evolución del Rendimiento</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="clientPerformanceChart" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" onclick="exportClientReport()">
+                        <i class="bi bi-download"></i> Exportar Reporte
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="sendClientReport()">
+                        <i class="bi bi-envelope"></i> Enviar por Email
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Variables globales
+        let performanceChart, roasDistributionChart, detailedComparisonChart, clientPerformanceChart;
+        let dashboardData = {};
+        let clientsData = [];
+        let currentFilters = {
+            period: 'month',
+            client: 'all',
+            segment: 'all'
+        };
+
+        // API Client simplificado
+        const api = {
+            baseUrl: '../api/',
+            
+            async getDashboard() {
+                try {
+                    const response = await fetch(`${this.baseUrl}dashboard`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener dashboard:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async getReporteCliente(clienteId) {
+                try {
+                    const response = await fetch(`${this.baseUrl}resultados/cliente/${clienteId}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener reporte de cliente:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async getClientes() {
+                try {
+                    const response = await fetch(`${this.baseUrl}clientes`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener clientes:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            }
+        };
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSidebar();
+            loadResultsData();
+            loadClientsData();
+            initializeCharts();
+            updateLastUpdateTime();
+        });
+
+        // Sidebar functionality
+        function initializeSidebar() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                        sidebar.classList.remove('show');
+                    }
+                }
+            });
+        }
+
+        // Cargar datos de resultados
+        async function loadResultsData() {
+            try {
+                const response = await api.getDashboard();
+                
+                if (response.success) {
+                    dashboardData = response.data;
+                    updatePerformanceCards();
+                    updateComparisonTable();
+                    updateChartsData();
+                } else {
+                    throw new Error(response.message);
+                }
+                
+            } catch (error) {
+                console.error('Error loading results:', error);
+                showError('Error al cargar los datos de resultados');
+            }
+        }
+
+        // Cargar datos de clientes
+        async function loadClientsData() {
+            try {
+                const response = await api.getClientes();
+                
+                if (response.success) {
+                    clientsData = response.data;
+                    populateClientFilter();
+                    renderClientReportsGrid();
+                } else {
+                    console.error('Error loading clients:', response.message);
+                }
+                
+            } catch (error) {
+                console.error('Error loading clients:', error);
+            }
+        }
+
+        // Poblar filtro de clientes
+        function populateClientFilter() {
+            const select = document.getElementById('clientFilter');
+            select.innerHTML = '<option value="all">Todos los clientes</option>';
+            
+            clientsData.forEach(client => {
+                if (client.activo) {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = `${client.nombre} - ${client.empresa || 'Sin empresa'}`;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        // Actualizar tarjetas de rendimiento
+        function updatePerformanceCards() {
+            const rendimiento = dashboardData.rendimiento_general || {};
+            
+            document.getElementById('totalInvestment').textContent = formatCurrency(rendimiento.inversion_total || 0);
+            document.getElementById('totalRevenue').textContent = formatCurrency(rendimiento.ingresos_total || 0);
+            document.getElementById('averageROAS').textContent = formatNumber(rendimiento.roas_promedio || 0, 2) + 'x';
+            document.getElementById('averageCTR').textContent = formatPercentage(rendimiento.ctr_promedio || 0);
+        }
+
+        // Actualizar tabla de comparación
+        function updateComparisonTable() {
+            const tbody = document.getElementById('comparisonTableBody');
+            const topClientes = dashboardData.top_clientes || [];
+            
+            if (topClientes.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            No hay datos disponibles para mostrar
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = topClientes.slice(0, 10).map(client => `
+                <tr>
+                    <td>
+                        <div>
+                            <div class="fw-bold">${client.nombre}</div>
+                            <small class="text-muted">${client.empresa || ''}</small>
+                        </div>
+                    </td>
+                    <td>${formatCurrency(client.inversion_total || 0)}</td>
+                    <td>${formatCurrency(client.ingresos_total || 0)}</td>
+                    <td>
+                        <div class="metric-comparison">
+                            <span class="fw-bold">${formatNumber(client.roas_promedio || 0, 2)}x</span>
+                            ${getTrendIndicator(client.roas_trend || 'stable')}
+                        </div>
+                    </td>
+                    <td>${formatPercentage(client.ctr_promedio || 0)}</td>
+                    <td>${formatNumber(client.conversiones_total || 0)}</td>
+                    <td>${getTrendIndicator(client.overall_trend || 'stable')}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Renderizar grid de reportes de clientes
+        function renderClientReportsGrid() {
+            const grid = document.getElementById('clientReportsGrid');
+            
+            if (clientsData.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-people"></i>
+                        <h5>No hay clientes registrados</h5>
+                        <p>Agrega clientes para generar reportes personalizados</p>
+                        <a href="cliente.html" class="btn btn-primary">
+                            <i class="bi bi-person-plus"></i> Agregar Cliente
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = clientsData.filter(client => client.activo).map(client => `
+                <div class="client-card" onclick="showClientReport(${client.id})">
+                    <div class="client-header">
+                        <div class="client-info">
+                            <h6>${client.nombre}</h6>
+                            <small>${client.empresa || 'Sin empresa'}</small>
+                        </div>
+                        <span class="client-status active">Activo</span>
+                    </div>
+                    
+                    <div class="client-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value text-primary">${formatNumber(client.total_estrategias || 0)}</div>
+                            <div class="metric-label">Estrategias</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value text-success">${formatNumber(client.roas_promedio || 0, 1)}x</div>
+                            <div class="metric-label">ROAS</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value text-warning">${formatCurrency(client.inversion_total || 0, 0)}</div>
+                            <div class="metric-label">Inversión</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value text-info">${formatCurrency(client.ingresos_total || 0, 0)}</div>
+                            <div class="metric-label">Ingresos</div>
+                        </div>
+                    </div>
+                    
+                    <div class="client-actions">
+                        <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); showClientReport(${client.id})">
+                            <i class="bi bi-eye"></i> Ver Reporte
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="event.stopPropagation(); exportClientPDF(${client.id})">
+                            <i class="bi bi-download"></i> PDF
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Inicializar gráficos
+        function initializeCharts() {
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Ingresos',
+                        data: [],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Inversión',
+                        data: [],
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'ROAS',
+                        data: [],
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value, 0);
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toFixed(1) + 'x';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.dataset.label === 'ROAS') {
+                                        label += context.parsed.y.toFixed(2) + 'x';
+                                    } else {
+                                        label += formatCurrency(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // ROAS Distribution Chart
+            const roasCtx = document.getElementById('roasDistributionChart').getContext('2d');
+            roasDistributionChart = new Chart(roasCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Excelente (>4x)', 'Bueno (2-4x)', 'Regular (1-2x)', 'Bajo (<1x)'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            '#059669',
+                            '#2563eb',
+                            '#d97706',
+                            '#dc2626'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return context.label + ': ' + context.parsed + ' clientes (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Actualizar datos de gráficos
+        function updateChartsData() {
+            const tendencias = dashboardData.tendencias || [];
+            
+            if (tendencias.length > 0) {
+                const labels = tendencias.map(t => {
+                    const date = new Date(t.mes + '-01');
+                    return date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+                });
+                const ingresos = tendencias.map(t => parseFloat(t.ingresos) || 0);
+                const inversion = tendencias.map(t => parseFloat(t.inversion) || 0);
+                const roas = tendencias.map(t => parseFloat(t.roas_promedio) || 0);
+                
+                performanceChart.data.labels = labels;
+                performanceChart.data.datasets[0].data = ingresos;
+                performanceChart.data.datasets[1].data = inversion;
+                performanceChart.data.datasets[2].data = roas;
+                performanceChart.update();
+            }
+
+            // Update ROAS distribution with simulated data
+            // In a real implementation, this would come from the API
+            roasDistributionChart.data.datasets[0].data = [
+                Math.floor(clientsData.length * 0.3),
+                Math.floor(clientsData.length * 0.45),
+                Math.floor(clientsData.length * 0.2),
+                Math.floor(clientsData.length * 0.05)
+            ];
+            roasDistributionChart.update();
+        }
+
+        // Mostrar reporte de cliente
+        async function showClientReport(clientId) {
+            try {
+                const result = await api.getReporteCliente(clientId);
+                
+                if (result.success) {
+                    const data = result.data;
+                    const client = data.cliente;
+                    const stats = data.estadisticas;
+                    
+                    document.getElementById('clientReportTitle').textContent = `Reporte - ${client.nombre}`;
+                    
+                    // Client info
+                    document.getElementById('clientInfoContent').innerHTML = `
+                        <p><strong>Empresa:</strong> ${client.empresa || 'N/A'}</p>
+                        <p><strong>Email:</strong> ${client.email}</p>
+                        <p><strong>Segmento:</strong> ${client.segmento || 'N/A'}</p>
+                        <p><strong>Presupuesto Mensual:</strong> ${formatCurrency(client.presupuesto_mensual || 0)}</p>
+                        <p><strong>Objetivo:</strong> ${client.objetivo_principal || 'N/A'}</p>
+                    `;
+                    
+                    // Client metrics
+                    document.getElementById('clientMetricsContent').innerHTML = `
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h4 text-primary">${stats?.total_estrategias || 0}</div>
+                                <small class="text-muted">Estrategias</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h4 text-success">${formatNumber(stats?.roas_promedio || 0, 2)}x</div>
+                                <small class="text-muted">ROAS Promedio</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h4 text-warning">${formatCurrency(stats?.inversion_total || 0, 0)}</div>
+                                <small class="text-muted">Inversión Total</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h4 text-info">${formatCurrency(stats?.ingresos_total || 0, 0)}</div>
+                                <small class="text-muted">Ingresos Total</small>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Initialize client performance chart
+                    initializeClientPerformanceChart(data.tendencias_cliente || []);
+                    
+                    new bootstrap.Modal(document.getElementById('clientReportModal')).show();
+                    
+                } else {
+                    throw new Error(result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error loading client report:', error);
+                showError('Error al cargar el reporte del cliente');
+            }
+        }
+
+        // Inicializar gráfico de rendimiento del cliente
+        function initializeClientPerformanceChart(tendenciasData) {
+            const ctx = document.getElementById('clientPerformanceChart').getContext('2d');
+            
+            if (clientPerformanceChart) {
+                clientPerformanceChart.destroy();
+            }
+            
+            const labels = tendenciasData.map(t => {
+                const date = new Date(t.mes + '-01');
+                return date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+            });
+            const ingresos = tendenciasData.map(t => parseFloat(t.ingresos) || 0);
+            const inversion = tendenciasData.map(t => parseFloat(t.inversion) || 0);
+            const roas = tendenciasData.map(t => parseFloat(t.roas_promedio) || 0);
+            
+            clientPerformanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Ingresos',
+                        data: ingresos,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Inversión',
+                        data: inversion,
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'ROAS',
+                        data: roas,
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left'
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false,
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Mostrar comparación detallada
+        function showDetailedComparison() {
+            new bootstrap.Modal(document.getElementById('detailedComparisonModal')).show();
+            
+            // Initialize detailed comparison chart
+            const ctx = document.getElementById('detailedComparisonChart').getContext('2d');
+            
+            if (detailedComparisonChart) {
+                detailedComparisonChart.destroy();
+            }
+            
+            detailedComparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: clientsData.filter(c => c.activo).slice(0, 10).map(c => c.nombre),
+                    datasets: [{
+                        label: 'ROAS',
+                        data: clientsData.filter(c => c.activo).slice(0, 10).map(c => c.roas_promedio || 0),
+                        backgroundColor: 'rgba(37, 99, 235, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Aplicar filtros
+        function applyFilters() {
+            currentFilters.period = document.getElementById('periodFilter').value;
+            currentFilters.client = document.getElementById('clientFilter').value;
+            currentFilters.segment = document.getElementById('segmentFilter').value;
+            
+            // Reload data with filters
+            loadResultsData();
+        }
+
+        // Limpiar filtros
+        function clearFilters() {
+            document.getElementById('periodFilter').value = 'month';
+            document.getElementById('clientFilter').value = 'all';
+            document.getElementById('segmentFilter').value = 'all';
+            
+            currentFilters = {
+                period: 'month',
+                client: 'all',
+                segment: 'all'
+            };
+            
+            loadResultsData();
+        }
+
+        // Cambiar período del gráfico
+        function changeChartPeriod(period, button) {
+            document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Update chart data based on period
+            // In a real implementation, this would fetch new data from the API
+            updateChartsData();
+        }
+
+        // Funciones de exportación
+        function refreshResults() {
+            loadResultsData();
+            updateLastUpdateTime();
+        }
+
+        function exportToPDF() {
+            showNotImplemented('Exportar PDF');
+        }
+
+        function exportToExcel() {
+            showNotImplemented('Exportar Excel');
+        }
+
+        function exportToCSV() {
+            showNotImplemented('Exportar CSV');
+        }
+
+        function exportExecutiveSummary() {
+            showNotImplemented('Resumen Ejecutivo');
+        }
+
+        function exportDetailedAnalysis() {
+            showNotImplemented('Análisis Detallado');
+        }
+
+        function exportPerformanceReport() {
+            showNotImplemented('Reporte de Rendimiento');
+        }
+
+        function exportOptimizationReport() {
+            showNotImplemented('Reporte de Optimizaciones');
+        }
+
+        function generateAllReports() {
+            showNotImplemented('Generar Todos los Reportes');
+        }
+
+        function exportComparisonChart() {
+            showNotImplemented('Exportar Gráfico de Comparación');
+        }
+
+        function exportClientReport() {
+            showNotImplemented('Exportar Reporte de Cliente');
+        }
+
+        function sendClientReport() {
+            showNotImplemented('Enviar Reporte por Email');
+        }
+
+        function exportClientPDF(clientId) {
+            showNotImplemented('Exportar PDF del Cliente');
+        }
+
+        // Utility functions
+        function updateLastUpdateTime() {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('es-ES');
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message
+            });
+        }
+
+        function showNotImplemented(feature) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Funcionalidad en Desarrollo',
+                text: `La función "${feature}" estará disponible en una próxima actualización.`,
+                timer: 3000,
+                showConfirmButton: false
+            });
+        }
+
+        function formatCurrency(amount, decimals = 2) {
+            return new Intl.NumberFormat('es-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }).format(amount);
+        }
+
+        function formatNumber(number, decimals = 0) {
+            return new Intl.NumberFormat('es-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }).format(number);
+        }
+
+        function formatPercentage(number) {
+            return (number * 100).toFixed(2) + '%';
+        }
+
+        function getTrendIndicator(trend) {
+            const indicators = {
+                'up': '<span class="trend-indicator trend-up"><i class="bi bi-arrow-up"></i> Subiendo</span>',
+                'down': '<span class="trend-indicator trend-down"><i class="bi bi-arrow-down"></i> Bajando</span>',
+                'stable': '<span class="trend-indicator trend-stable"><i class="bi bi-dash"></i> Estable</span>'
+            };
+            return indicators[trend] || indicators['stable'];
+        }
+
+        // Event listeners para filtros
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-apply filters on change
+            document.getElementById('periodFilter').addEventListener('change', applyFilters);
+            document.getElementById('clientFilter').addEventListener('change', applyFilters);
+            document.getElementById('segmentFilter').addEventListener('change', applyFilters);
+            
+            // Comparison modal metric change
+            document.getElementById('comparisonMetric')?.addEventListener('change', function() {
+                if (detailedComparisonChart) {
+                    updateDetailedComparisonChart();
+                }
+            });
+            
+            document.getElementById('comparisonPeriod')?.addEventListener('change', function() {
+                if (detailedComparisonChart) {
+                    updateDetailedComparisonChart();
+                }
+            });
+        });
+
+        function updateDetailedComparisonChart() {
+            const metric = document.getElementById('comparisonMetric').value;
+            const period = document.getElementById('comparisonPeriod').value;
+            
+            let data, label, color;
+            
+            switch(metric) {
+                case 'roas':
+                    data = clientsData.filter(c => c.activo).slice(0, 10).map(c => c.roas_promedio || 0);
+                    label = 'ROAS';
+                    color = 'rgba(37, 99, 235, 0.8)';
+                    break;
+                case 'revenue':
+                    data = clientsData.filter(c => c.activo).slice(0, 10).map(c => c.ingresos_total || 0);
+                    label = 'Ingresos';
+                    color = 'rgba(5, 150, 105, 0.8)';
+                    break;
+                case 'investment':
+                    data = clientsData.filter(c => c.activo).slice(0, 10).map(c => c.inversion_total || 0);
+                    label = 'Inversión';
+                    color = 'rgba(220, 38, 38, 0.8)';
+                    break;
+                case 'ctr':
+                    data = clientsData.filter(c => c.activo).slice(0, 10).map(c => c.ctr_promedio || 0);
+                    label = 'CTR';
+                    color = 'rgba(217, 119, 6, 0.8)';
+                    break;
+                case 'conversions':
+                    data = clientsData.filter(c => c.activo).slice(0, 10).map(c => c.conversiones_total || 0);
+                    label = 'Conversiones';
+                    color = 'rgba(139, 92, 246, 0.8)';
+                    break;
+                default:
+                    data = clientsData.filter(c => c.activo).slice(0, 10).map(c => c.roas_promedio || 0);
+                    label = 'ROAS';
+                    color = 'rgba(37, 99, 235, 0.8)';
+            }
+            
+            detailedComparisonChart.data.datasets[0].data = data;
+            detailedComparisonChart.data.datasets[0].label = label;
+            detailedComparisonChart.data.datasets[0].backgroundColor = color;
+            detailedComparisonChart.update();
+        }
+
+        // Función para generar reportes sintéticos (simulación)
+        function generateSyntheticData() {
+            // Esta función simula datos cuando no hay información real disponible
+            return {
+                rendimiento_general: {
+                    inversion_total: 45000,
+                    ingresos_total: 180000,
+                    roas_promedio: 4.2,
+                    ctr_promedio: 0.034
+                },
+                tendencias: [
+                    { mes: '2024-01', ingresos: 25000, inversion: 6000, roas_promedio: 4.1 },
+                    { mes: '2024-02', ingresos: 28000, inversion: 6500, roas_promedio: 4.3 },
+                    { mes: '2024-03', ingresos: 32000, inversion: 7200, roas_promedio: 4.4 },
+                    { mes: '2024-04', ingresos: 35000, inversion: 8000, roas_promedio: 4.3 },
+                    { mes: '2024-05', ingresos: 38000, inversion: 8800, roas_promedio: 4.5 },
+                    { mes: '2024-06', ingresos: 42000, inversion: 9500, roas_promedio: 4.4 }
+                ],
+                top_clientes: clientsData.slice(0, 5).map((client, index) => ({
+                    ...client,
+                    inversion_total: Math.floor(Math.random() * 15000) + 5000,
+                    ingresos_total: Math.floor(Math.random() * 60000) + 20000,
+                    roas_promedio: Math.random() * 3 + 2,
+                    ctr_promedio: Math.random() * 0.05 + 0.02,
+                    conversiones_total: Math.floor(Math.random() * 500) + 100,
+                    roas_trend: ['up', 'down', 'stable'][Math.floor(Math.random() * 3)],
+                    overall_trend: ['up', 'down', 'stable'][Math.floor(Math.random() * 3)]
+                }))
+            };
+        }
+
+        // Si no hay datos reales, usar datos sintéticos para demostración
+        function ensureDataAvailability() {
+            if (!dashboardData.rendimiento_general && clientsData.length > 0) {
+                console.log('Generando datos sintéticos para demostración...');
+                const syntheticData = generateSyntheticData();
+                dashboardData = { ...dashboardData, ...syntheticData };
+                updatePerformanceCards();
+                updateComparisonTable();
+                updateChartsData();
+            }
+        }
+
+        // Auto-generate synthetic data if needed after clients are loaded
+        setTimeout(() => {
+            ensureDataAvailability();
+        }, 2000);
+
+        // Funciones de utilidad adicionales para manejo de fechas
+        function getDateRange(period) {
+            const now = new Date();
+            let startDate, endDate = now;
+            
+            switch(period) {
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'quarter':
+                    const quarter = Math.floor(now.getMonth() / 3);
+                    startDate = new Date(now.getFullYear(), quarter * 3, 1);
+                    break;
+                case 'semester':
+                    const semester = Math.floor(now.getMonth() / 6);
+                    startDate = new Date(now.getFullYear(), semester * 6, 1);
+                    break;
+                case 'year':
+                    startDate = new Date(now.getFullYear(), 0, 1);
+                    break;
+                default:
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            }
+            
+            return { startDate, endDate };
+        }
+
+        // Función para actualizar datos en tiempo real (simulación)
+        function startRealTimeUpdates() {
+            setInterval(() => {
+                // Simular pequeñas variaciones en los datos
+                if (dashboardData.rendimiento_general) {
+                    const variation = (Math.random() - 0.5) * 0.02; // ±1% variation
+                    dashboardData.rendimiento_general.roas_promedio *= (1 + variation);
+                    updatePerformanceCards();
+                }
+            }, 30000); // Actualizar cada 30 segundos
+        }
+
+        // Inicializar actualizaciones en tiempo real
+        startRealTimeUpdates();
+
+        // Export functionality improvements
+        function downloadChart(chartInstance, filename) {
+            const link = document.createElement('a');
+            link.download = filename + '.png';
+            link.href = chartInstance.toBase64Image();
+            link.click();
+        }
+
+        function downloadData(data, filename, format = 'json') {
+            let content, mimeType;
+            
+            switch(format) {
+                case 'csv':
+                    content = convertToCSV(data);
+                    mimeType = 'text/csv';
+                    break;
+                case 'json':
+                default:
+                    content = JSON.stringify(data, null, 2);
+                    mimeType = 'application/json';
+                    break;
+            }
+            
+            const blob = new Blob([content], { type: mimeType });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename + '.' + format;
+            link.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function convertToCSV(data) {
+            if (!Array.isArray(data) || data.length === 0) return '';
+            
+            const headers = Object.keys(data[0]);
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => headers.map(header => 
+                    typeof row[header] === 'string' ? `"${row[header]}"` : row[header]
+                ).join(','))
+            ].join('\n');
+            
+            return csvContent;
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + R para actualizar
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                refreshResults();
+            }
+            
+            // Ctrl/Cmd + E para exportar
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                e.preventDefault();
+                exportToPDF();
+            }
+        });
+
+        // Print functionality
+        function printReport() {
+            window.print();
+        }
+
+        // Add print styles
+        const printStyles = `
+            @media print {
+                .sidebar, .top-bar, .btn, .dropdown {
+                    display: none !important;
+                }
+                .main-content {
+                    margin-left: 0 !important;
+                }
+                .performance-card, .chart-card, .client-card {
+                    break-inside: avoid;
+                    margin-bottom: 1rem;
+                }
+                .charts-section {
+                    grid-template-columns: 1fr !important;
+                }
+            }
+        `;
+
+        // Inject print styles
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = printStyles;
+        document.head.appendChild(styleSheet);
+    </script>
+</body>
+</html>

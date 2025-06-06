@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimización - ADS Manager Pro 3</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../css/main.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--dark-color) 0%, #334155 100%);
+            color: white;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            margin: 0.25rem 1rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 20px;
+        }
+
+        .top-bar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .breadcrumb {
+            background: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .breadcrumb-item {
+            color: var(--secondary-color);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        /* Page specific styles */
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .optimizations-table-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .table-header {
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 300px;
+            flex: 1;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+        }
+
+        .table {
+            margin: 0;
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: var(--dark-color);
+            background-color: #f8fafc;
+            padding: 1rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .optimization-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .optimization-title {
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .optimization-client {
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .priority-badge.critical {
+            background-color: var(--danger-color);
+        }
+
+        .priority-badge.high {
+            background-color: var(--warning-color);
+        }
+
+        .priority-badge.medium {
+            background-color: var(--primary-color);
+        }
+
+        .priority-badge.low {
+            background-color: var(--secondary-color);
+        }
+
+        .status-badge.proposed {
+            background-color: var(--primary-color);
+        }
+
+        .status-badge.in-progress {
+            background-color: var(--warning-color);
+        }
+
+        .status-badge.implemented {
+            background-color: var(--success-color);
+        }
+
+        .status-badge.discarded {
+            background-color: var(--secondary-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        /* Modal styles */
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom: none;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .form-floating label {
+            color: var(--secondary-color);
+        }
+
+        .form-select, .form-control {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+        }
+
+        .form-select:focus, .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+
+        /* Kanban Board Styles */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kanban-column {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .kanban-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .kanban-title {
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .kanban-count {
+            background-color: var(--gray-200);
+            color: var(--gray-700);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .kanban-cards {
+            min-height: 200px;
+        }
+
+        .optimization-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .optimization-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .optimization-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .optimization-card-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .optimization-card-client {
+            color: var(--secondary-color);
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .optimization-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .stats-summary {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .page-header {
+                padding: 1rem;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading states */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--secondary-color);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* View toggle styles */
+        .view-toggle {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 0.25rem;
+        }
+
+        .view-toggle-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            color: var(--secondary-color);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .view-toggle-btn.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4 class="mb-0">
+                <i class="bi bi-bullseye"></i> ADS Manager Pro 3
+            </h4>
+            <small class="text-muted">v3.0.0</small>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-item">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="cliente.html" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Clientes</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="estrategia.html" class="nav-link">
+                    <i class="bi bi-lightbulb"></i>
+                    <span>Estrategias</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="metricas.html" class="nav-link">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Métricas</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="optimizacion.html" class="nav-link active">
+                    <i class="bi bi-gear"></i>
+                    <span>Optimización</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="resultados.html" class="nav-link">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Resultados</span>
+                </a>
+            </div>
+            
+            <hr class="my-3 mx-3" style="border-color: rgba(255, 255, 255, 0.2);">
+            
+            <div class="nav-item">
+                <a href="../index.html" class="nav-link">
+                    <i class="bi bi-house"></i>
+                    <span>Inicio</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-secondary d-md-none" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Optimización</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="view-toggle">
+                    <button class="view-toggle-btn active" onclick="switchView('kanban')" id="kanbanViewBtn">
+                        <i class="bi bi-kanban"></i> Kanban
+                    </button>
+                    <button class="view-toggle-btn" onclick="switchView('table')" id="tableViewBtn">
+                        <i class="bi bi-table"></i> Tabla
+                    </button>
+                </div>
+                <button class="btn btn-outline-primary" onclick="refreshOptimizations()">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                </button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#optimizationModal">
+                    <i class="bi bi-plus-circle"></i> Nueva Optimización
+                </button>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="container-fluid p-4">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="h3 mb-2">Sistema de Optimización</h1>
+                        <p class="text-muted mb-0">Identifica oportunidades, propón mejoras y hace seguimiento de las optimizaciones implementadas</p>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">Total de optimizaciones: <span id="totalOptimizationsCount">--</span></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Summary -->
+            <div class="stats-summary">
+                <div class="stat-card">
+                    <div class="stat-value text-primary" id="proposedCount">--</div>
+                    <div class="stat-label">Propuestas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value text-warning" id="inProgressCount">--</div>
+                    <div class="stat-label">En Progreso</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value text-success" id="implementedCount">--</div>
+                    <div class="stat-label">Implementadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value text-danger" id="criticalCount">--</div>
+                    <div class="stat-label">Prioridad Crítica</div>
+                </div>
+            </div>
+
+            <!-- Kanban View -->
+            <div id="kanbanView" class="kanban-board">
+                <div class="kanban-column">
+                    <div class="kanban-header">
+                        <h6 class="kanban-title text-primary">
+                            <i class="bi bi-lightbulb"></i> Propuestas
+                        </h6>
+                        <span class="kanban-count" id="proposedKanbanCount">0</span>
+                    </div>
+                    <div class="kanban-cards" id="proposedCards">
+                        <div class="empty-state">
+                            <i class="bi bi-lightbulb"></i>
+                            <p>No hay propuestas</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="kanban-column">
+                    <div class="kanban-header">
+                        <h6 class="kanban-title text-warning">
+                            <i class="bi bi-clock"></i> En Progreso
+                        </h6>
+                        <span class="kanban-count" id="inProgressKanbanCount">0</span>
+                    </div>
+                    <div class="kanban-cards" id="inProgressCards">
+                        <div class="empty-state">
+                            <i class="bi bi-clock"></i>
+                            <p>No hay optimizaciones en progreso</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="kanban-column">
+                    <div class="kanban-header">
+                        <h6 class="kanban-title text-success">
+                            <i class="bi bi-check-circle"></i> Implementadas
+                        </h6>
+                        <span class="kanban-count" id="implementedKanbanCount">0</span>
+                    </div>
+                    <div class="kanban-cards" id="implementedCards">
+                        <div class="empty-state">
+                            <i class="bi bi-check-circle"></i>
+                            <p>No hay optimizaciones implementadas</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="kanban-column">
+                    <div class="kanban-header">
+                        <h6 class="kanban-title text-secondary">
+                            <i class="bi bi-x-circle"></i> Descartadas
+                        </h6>
+                        <span class="kanban-count" id="discardedKanbanCount">0</span>
+                    </div>
+                    <div class="kanban-cards" id="discardedCards">
+                        <div class="empty-state">
+                            <i class="bi bi-x-circle"></i>
+                            <p>No hay optimizaciones descartadas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table View -->
+            <div id="tableView" class="optimizations-table-card d-none">
+                <div class="table-header">
+                    <h5 class="mb-0">Lista de Optimizaciones</h5>
+                    <div class="d-flex gap-3 align-items-center">
+                        <div class="search-box">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="form-control" placeholder="Buscar optimizaciones..." id="searchInput">
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="bi bi-funnel"></i> Filtrar
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('all')">Todos</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('propuesta')">Propuestas</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('en_progreso')">En Progreso</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('implementada')">Implementadas</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByPriority('critica')">Crítica</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByPriority('alta')">Alta</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByPriority('media')">Media</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive" style="position: relative;">
+                    <div class="loading-overlay d-none" id="tableLoading">
+                        <div class="spinner"></div>
+                    </div>
+                    
+                    <table class="table" id="optimizationsTable">
+                        <thead>
+                            <tr>
+                                <th>Optimización</th>
+                                <th>Cliente</th>
+                                <th>Prioridad</th>
+                                <th>Estado</th>
+                                <th>Fecha Análisis</th>
+                                <th>Impacto Esperado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="optimizationsTableBody">
+                            <!-- Content will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optimization Modal -->
+    <div class="modal fade" id="optimizationModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="optimizationModalTitle">Nueva Optimización</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="optimizationForm">
+                        <input type="hidden" id="optimizationId">
+                        
+                        <div class="row g-3">
+                            <!-- Información Básica -->
+                            <div class="col-12">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-info-circle"></i> Información Básica
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="clienteId" required>
+                                        <option value="">Seleccionar cliente</option>
+                                    </select>
+                                    <label for="clienteId">Cliente *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="estrategiaId">
+                                        <option value="">Seleccionar estrategia (opcional)</option>
+                                    </select>
+                                    <label for="estrategiaId">Estrategia</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="titulo" required>
+                                    <label for="titulo">Título de la Optimización *</label>
+                                </div>
+                            </div>
+
+                            <!-- Análisis -->
+                            <div class="col-12 mt-4">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-search"></i> Análisis de Resultados
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="queFunciono" style="height: 120px"></textarea>
+                                    <label for="queFunciono">¿Qué Funcionó Bien?</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="queNoFunciono" style="height: 120px"></textarea>
+                                    <label for="queNoFunciono">¿Qué No Funcionó?</label>
+                                </div>
+                            </div>
+
+                            <!-- Propuestas -->
+                            <div class="col-12 mt-4">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-lightbulb"></i> Propuestas de Mejora
+                                </h6>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="mejorasPropuestas" style="height: 120px" required></textarea>
+                                    <label for="mejorasPropuestas">Mejoras Propuestas *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="impactoEsperado" style="height: 100px"></textarea>
+                                    <label for="impactoEsperado">Impacto Esperado</label>
+                                </div>
+                            </div>
+
+                            <!-- Prioridad y Estado -->
+                            <div class="col-12 mt-4">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-flag"></i> Clasificación
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="prioridad" required>
+                                        <option value="">Seleccionar prioridad</option>
+                                        <option value="baja">Baja</option>
+                                        <option value="media">Media</option>
+                                        <option value="alta">Alta</option>
+                                        <option value="critica">Crítica</option>
+                                    </select>
+                                    <label for="prioridad">Prioridad *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="estado">
+                                        <option value="propuesta">Propuesta</option>
+                                        <option value="en_progreso">En Progreso</option>
+                                        <option value="implementada">Implementada</option>
+                                        <option value="descartada">Descartada</option>
+                                    </select>
+                                    <label for="estado">Estado</label>
+                                </div>
+                            </div>
+
+                            <!-- Implementación (solo si estado es implementada) -->
+                            <div class="col-12 mt-4" id="implementationSection" style="display: none;">
+                                <h6 class="mb-3 text-success">
+                                    <i class="bi bi-check-circle"></i> Implementación y Resultados
+                                </h6>
+                                
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="accionesImplementadas" style="height: 100px"></textarea>
+                                        <label for="accionesImplementadas">Acciones Implementadas</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 mt-3">
+                                    <div class="form-floating">
+                                        <input type="date" class="form-control" id="fechaImplementacion">
+                                        <label for="fechaImplementacion">Fecha de Implementación</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 mt-3">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="resultadosObtenidos" style="height: 100px"></textarea>
+                                        <label for="resultadosObtenidos">Resultados Obtenidos</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveOptimization()">
+                        <i class="bi bi-check-circle"></i> Guardar Optimización
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Implementation Modal -->
+    <div class="modal fade" id="implementationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Marcar como Implementada</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="implementationForm">
+                        <input type="hidden" id="implementationOptimizationId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Optimización:</label>
+                            <p id="implementationTitle" class="text-muted">--</p>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="implementationActions" style="height: 120px" required></textarea>
+                            <label for="implementationActions">Acciones Implementadas *</label>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control" id="implementationDate" required>
+                            <label for="implementationDate">Fecha de Implementación *</label>
+                        </div>
+                        
+                        <div class="form-floating">
+                            <textarea class="form-control" id="implementationResults" style="height: 120px"></textarea>
+                            <label for="implementationResults">Resultados Obtenidos</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="markAsImplemented()">
+                        <i class="bi bi-check-circle"></i> Marcar como Implementada
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery (required for DataTables) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        // Variables globales
+        let optimizationsDataTable;
+        let optimizationsData = [];
+        let clientsData = [];
+        let strategiesData = [];
+        let editingOptimizationId = null;
+        let currentView = 'kanban';
+
+        // API Client simplificado
+        const api = {
+            baseUrl: '../api/',
+            
+            async getOptimizaciones() {
+                try {
+                    const response = await fetch(`${this.baseUrl}optimizacion`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener optimizaciones:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async getOptimizacion(id) {
+                try {
+                    const response = await fetch(`${this.baseUrl}optimizacion/${id}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener optimización:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async createOptimizacion(data) {
+                try {
+                    const response = await fetch(`${this.baseUrl}optimizacion`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al crear optimización:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async updateOptimizacion(id, data) {
+                try {
+                    const response = await fetch(`${this.baseUrl}optimizacion/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al actualizar optimización:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async cambiarEstadoOptimizacion(id, estado) {
+                try {
+                    const response = await fetch(`${this.baseUrl}optimizacion/${id}/cambiar-estado`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ estado })
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al cambiar estado:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async implementarOptimizacion(id, data) {
+                try {
+                    const response = await fetch(`${this.baseUrl}optimizacion/${id}/implementar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al implementar optimización:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async getClientes() {
+                try {
+                    const response = await fetch(`${this.baseUrl}clientes`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener clientes:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async getEstrategias(clienteId = null) {
+                try {
+                    const url = clienteId ? `${this.baseUrl}estrategias?cliente_id=${clienteId}` : `${this.baseUrl}estrategias`;
+                    const response = await fetch(url);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener estrategias:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            }
+        };
+
+        // Validador simplificado
+        function validateForm(form) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            return { isValid };
+        }
+
+        function enableRealTimeValidation(form) {
+            const inputs = form.querySelectorAll('input, select, textarea');
+            
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => validateForm(form));
+                input.addEventListener('input', () => {
+                    input.classList.remove('is-invalid');
+                });
+            });
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSidebar();
+            loadOptimizationsData();
+            loadClientsData();
+            setupFormValidation();
+            setupFormEvents();
+        });
+
+        // Sidebar functionality
+        function initializeSidebar() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                        sidebar.classList.remove('show');
+                    }
+                }
+            });
+        }
+
+        // Cargar datos de optimizaciones
+        async function loadOptimizationsData() {
+            try {
+                showTableLoading(true);
+                
+                const response = await api.getOptimizaciones();
+                
+                if (response.success) {
+                    optimizationsData = response.data;
+                    updateStatsCards();
+                    if (currentView === 'kanban') {
+                        renderKanbanView();
+                    } else {
+                        renderTableView();
+                    }
+                } else {
+                    throw new Error(response.message);
+                }
+                
+            } catch (error) {
+                console.error('Error loading optimizations:', error);
+                showError('Error al cargar las optimizaciones');
+            } finally {
+                showTableLoading(false);
+            }
+        }
+
+        // Cargar datos de clientes
+        async function loadClientsData() {
+            try {
+                const response = await api.getClientes();
+                
+                if (response.success) {
+                    clientsData = response.data;
+                    populateClientSelect();
+                } else {
+                    console.error('Error loading clients:', response.message);
+                }
+                
+            } catch (error) {
+                console.error('Error loading clients:', error);
+            }
+        }
+
+        // Poblar select de clientes
+        function populateClientSelect() {
+            const select = document.getElementById('clienteId');
+            select.innerHTML = '<option value="">Seleccionar cliente</option>';
+            
+            clientsData.forEach(client => {
+                if (client.activo) {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = `${client.nombre} - ${client.empresa || 'Sin empresa'}`;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        // Cargar estrategias por cliente
+        async function loadStrategiesByClient(clienteId) {
+            try {
+                const response = await api.getEstrategias(clienteId);
+                
+                if (response.success) {
+                    const select = document.getElementById('estrategiaId');
+                    select.innerHTML = '<option value="">Seleccionar estrategia (opcional)</option>';
+                    
+                    response.data.forEach(strategy => {
+                        const option = document.createElement('option');
+                        option.value = strategy.id;
+                        option.textContent = strategy.nombre_estrategia;
+                        select.appendChild(option);
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Error loading strategies:', error);
+            }
+        }
+
+        // Actualizar tarjetas de estadísticas
+        function updateStatsCards() {
+            const stats = {
+                proposed: optimizationsData.filter(o => o.estado === 'propuesta').length,
+                inProgress: optimizationsData.filter(o => o.estado === 'en_progreso').length,
+                implemented: optimizationsData.filter(o => o.estado === 'implementada').length,
+                critical: optimizationsData.filter(o => o.prioridad === 'critica').length
+            };
+
+            document.getElementById('totalOptimizationsCount').textContent = optimizationsData.length;
+            document.getElementById('proposedCount').textContent = stats.proposed;
+            document.getElementById('inProgressCount').textContent = stats.inProgress;
+            document.getElementById('implementedCount').textContent = stats.implemented;
+            document.getElementById('criticalCount').textContent = stats.critical;
+        }
+
+        // Renderizar vista Kanban
+        function renderKanbanView() {
+            const columns = {
+                propuesta: document.getElementById('proposedCards'),
+                en_progreso: document.getElementById('inProgressCards'),
+                implementada: document.getElementById('implementedCards'),
+                descartada: document.getElementById('discardedCards')
+            };
+
+            // Limpiar columnas
+            Object.values(columns).forEach(column => {
+                column.innerHTML = '';
+            });
+
+            // Agrupar optimizaciones por estado
+            const groupedOptimizations = optimizationsData.reduce((acc, opt) => {
+                if (!acc[opt.estado]) acc[opt.estado] = [];
+                acc[opt.estado].push(opt);
+                return acc;
+            }, {});
+
+            // Renderizar cada columna
+            Object.keys(columns).forEach(status => {
+                const column = columns[status];
+                const optimizations = groupedOptimizations[status] || [];
+                
+                // Actualizar contador
+                const countElement = document.getElementById(`${getCountIdFromStatus(status)}KanbanCount`);
+                if (countElement) {
+                    countElement.textContent = optimizations.length;
+                }
+
+                if (optimizations.length === 0) {
+                    column.innerHTML = `
+                        <div class="empty-state">
+                            <i class="bi bi-${getIconFromStatus(status)}"></i>
+                            <p>No hay optimizaciones en ${getStatusLabel(status).toLowerCase()}</p>
+                        </div>
+                    `;
+                } else {
+                    column.innerHTML = optimizations.map(opt => createOptimizationCard(opt)).join('');
+                }
+            });
+        }
+
+        // Crear tarjeta de optimización para Kanban
+        function createOptimizationCard(optimization) {
+            return `
+                <div class="optimization-card" onclick="viewOptimization(${optimization.id})">
+                    <div class="optimization-card-title">${optimization.titulo}</div>
+                    <div class="optimization-card-client">
+                        <i class="bi bi-building"></i> ${optimization.cliente_nombre || 'Cliente no especificado'}
+                    </div>
+                    <div class="optimization-card-footer">
+                        <span class="badge priority-badge ${getPriorityClass(optimization.prioridad)}">
+                            ${getPriorityLabel(optimization.prioridad)}
+                        </span>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" onclick="event.stopPropagation()">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); editOptimization(${optimization.id})">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a></li>
+                                ${optimization.estado === 'propuesta' ? `
+                                    <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); changeStatus(${optimization.id}, 'en_progreso')">
+                                        <i class="bi bi-play"></i> Iniciar
+                                    </a></li>
+                                ` : ''}
+                                ${optimization.estado === 'en_progreso' ? `
+                                    <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); showImplementationModal(${optimization.id})">
+                                        <i class="bi bi-check"></i> Implementar
+                                    </a></li>
+                                ` : ''}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="event.stopPropagation(); changeStatus(${optimization.id}, 'descartada')">
+                                    <i class="bi bi-trash"></i> Descartar
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renderizar vista de tabla
+        function renderTableView() {
+            const tbody = document.getElementById('optimizationsTableBody');
+            
+            if (optimizationsData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="bi bi-gear"></i>
+                                <h5>No hay optimizaciones registradas</h5>
+                                <p>Comienza creando tu primera optimización para mejorar el rendimiento de las campañas</p>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#optimizationModal">
+                                    <i class="bi bi-plus-circle"></i> Crear Primera Optimización
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = optimizationsData.map(opt => `
+                <tr>
+                    <td>
+                        <div class="optimization-info">
+                            <div class="optimization-title">${opt.titulo}</div>
+                            <div class="optimization-client">
+                                <i class="bi bi-building"></i> ${opt.cliente_nombre || 'Sin cliente'}
+                            </div>
+                        </div>
+                    </td>
+                    <td>${opt.cliente_nombre || 'N/A'}</td>
+                    <td>
+                        <span class="badge priority-badge ${getPriorityClass(opt.prioridad)}">
+                            ${getPriorityLabel(opt.prioridad)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge status-badge ${getStatusClass(opt.estado)}">
+                            ${getStatusLabel(opt.estado)}
+                        </span>
+                    </td>
+                    <td>${formatDate(opt.fecha_analisis)}</td>
+                    <td>${opt.impacto_esperado ? opt.impacto_esperado.substring(0, 50) + '...' : 'N/A'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewOptimization(${opt.id})" title="Ver detalles">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="editOptimization(${opt.id})" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            ${opt.estado === 'en_progreso' ? `
+                                <button class="btn btn-sm btn-outline-success" onclick="showImplementationModal(${opt.id})" title="Implementar">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Initialize DataTable if not already initialized
+            if ($.fn.DataTable.isDataTable('#optimizationsTable')) {
+                $('#optimizationsTable').DataTable().destroy();
+            }
+
+            optimizationsDataTable = $('#optimizationsTable').DataTable({
+                pageLength: 10,
+                responsive: true,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
+                },
+                columnDefs: [
+                    { orderable: false, targets: [6] } // Disable sorting for actions column
+                ]
+            });
+        }
+
+        // Cambiar vista
+        function switchView(view) {
+            currentView = view;
+            
+            document.getElementById('kanbanViewBtn').classList.toggle('active', view === 'kanban');
+            document.getElementById('tableViewBtn').classList.toggle('active', view === 'table');
+            
+            document.getElementById('kanbanView').classList.toggle('d-none', view !== 'kanban');
+            document.getElementById('tableView').classList.toggle('d-none', view !== 'table');
+            
+            if (view === 'kanban') {
+                renderKanbanView();
+            } else {
+                renderTableView();
+            }
+        }
+
+        // Configurar validación de formulario
+        function setupFormValidation() {
+            const form = document.getElementById('optimizationForm');
+            enableRealTimeValidation(form);
+        }
+
+        // Configurar eventos del formulario
+        function setupFormEvents() {
+            // Evento para cambiar estrategias cuando cambia el cliente
+            document.getElementById('clienteId').addEventListener('change', function() {
+                const clienteId = this.value;
+                if (clienteId) {
+                    loadStrategiesByClient(clienteId);
+                } else {
+                    document.getElementById('estrategiaId').innerHTML = '<option value="">Seleccionar estrategia (opcional)</option>';
+                }
+            });
+
+            // Evento para mostrar/ocultar sección de implementación
+            document.getElementById('estado').addEventListener('change', function() {
+                const implementationSection = document.getElementById('implementationSection');
+                if (this.value === 'implementada') {
+                    implementationSection.style.display = 'block';
+                } else {
+                    implementationSection.style.display = 'none';
+                }
+            });
+        }
+
+        // Guardar optimización
+        async function saveOptimization() {
+            try {
+                const form = document.getElementById('optimizationForm');
+                
+                const validation = validateForm(form);
+                if (!validation.isValid) {
+                    return;
+                }
+                
+                const optimizationData = {
+                    cliente_id: document.getElementById('clienteId').value,
+                    estrategia_id: document.getElementById('estrategiaId').value || null,
+                    titulo: document.getElementById('titulo').value.trim(),
+                    que_funciono: document.getElementById('queFunciono').value.trim(),
+                    que_no_funciono: document.getElementById('queNoFunciono').value.trim(),
+                    mejoras_propuestas: document.getElementById('mejorasPropuestas').value.trim(),
+                    impacto_esperado: document.getElementById('impactoEsperado').value.trim(),
+                    prioridad: document.getElementById('prioridad').value,
+                    estado: document.getElementById('estado').value,
+                    acciones_implementadas: document.getElementById('accionesImplementadas').value.trim(),
+                    fecha_implementacion: document.getElementById('fechaImplementacion').value,
+                    resultados_obtenidos: document.getElementById('resultadosObtenidos').value.trim()
+                };
+                
+                const saveBtn = event.target;
+                const originalText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+                saveBtn.disabled = true;
+                
+                let result;
+                if (editingOptimizationId) {
+                    result = await api.updateOptimizacion(editingOptimizationId, optimizationData);
+                } else {
+                    result = await api.createOptimizacion(optimizationData);
+                }
+                
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: editingOptimizationId ? 'Optimización actualizada' : 'Optimización creada',
+                        text: result.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    bootstrap.Modal.getInstance(document.getElementById('optimizationModal')).hide();
+                    loadOptimizationsData();
+                    resetForm();
+                    
+                } else {
+                    throw new Error(result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error saving optimization:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Error al guardar la optimización'
+                });
+            } finally {
+                const saveBtn = document.querySelector('#optimizationModal .btn-primary');
+                saveBtn.innerHTML = '<i class="bi bi-check-circle"></i> Guardar Optimización';
+                saveBtn.disabled = false;
+            }
+        }
+
+        // Ver detalles de optimización
+        async function viewOptimization(optimizationId) {
+            try {
+                const result = await api.getOptimizacion(optimizationId);
+                
+                if (result.success) {
+                    const opt = result.data;
+                    
+                    Swal.fire({
+                        title: opt.titulo,
+                        html: `
+                            <div class="text-start">
+                                <p><strong>Cliente:</strong> ${opt.cliente_nombre || 'N/A'}</p>
+                                <p><strong>Estrategia:</strong> ${opt.estrategia_nombre || 'N/A'}</p>
+                                <p><strong>Prioridad:</strong> <span class="badge priority-badge ${getPriorityClass(opt.prioridad)}">${getPriorityLabel(opt.prioridad)}</span></p>
+                                <p><strong>Estado:</strong> <span class="badge status-badge ${getStatusClass(opt.estado)}">${getStatusLabel(opt.estado)}</span></p>
+                                
+                                ${opt.que_funciono ? `
+                                    <hr><h6>¿Qué funcionó bien?</h6>
+                                    <p>${opt.que_funciono}</p>
+                                ` : ''}
+                                
+                                ${opt.que_no_funciono ? `
+                                    <hr><h6>¿Qué no funcionó?</h6>
+                                    <p>${opt.que_no_funciono}</p>
+                                ` : ''}
+                                
+                                <hr><h6>Mejoras propuestas</h6>
+                                <p>${opt.mejoras_propuestas}</p>
+                                
+                                ${opt.impacto_esperado ? `
+                                    <hr><h6>Impacto esperado</h6>
+                                    <p>${opt.impacto_esperado}</p>
+                                ` : ''}
+                                
+                                ${opt.estado === 'implementada' && opt.resultados_obtenidos ? `
+                                    <hr><h6>Resultados obtenidos</h6>
+                                    <p>${opt.resultados_obtenidos}</p>
+                                ` : ''}
+                            </div>
+                        `,
+                        width: 800,
+                        showConfirmButton: false,
+                        showCloseButton: true,
+                        footer: `
+                            <button class="btn btn-primary me-2" onclick="editOptimization(${optimizationId}); Swal.close();">
+                                <i class="bi bi-pencil"></i> Editar
+                            </button>
+                            ${opt.estado === 'en_progreso' ? `
+                                <button class="btn btn-success" onclick="showImplementationModal(${optimizationId}); Swal.close();">
+                                    <i class="bi bi-check"></i> Implementar
+                                </button>
+                            ` : ''}
+                        `
+                    });
+                } else {
+                    throw new Error(result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error viewing optimization:', error);
+                showError('Error al cargar los detalles de la optimización');
+            }
+        }
+
+        // Editar optimización
+        async function editOptimization(optimizationId) {
+            try {
+                const result = await api.getOptimizacion(optimizationId);
+                
+                if (result.success) {
+                    const opt = result.data;
+                    
+                    document.getElementById('optimizationId').value = opt.id;
+                    document.getElementById('clienteId').value = opt.cliente_id || '';
+                    document.getElementById('titulo').value = opt.titulo || '';
+                    document.getElementById('queFunciono').value = opt.que_funciono || '';
+                    document.getElementById('queNoFunciono').value = opt.que_no_funciono || '';
+                    document.getElementById('mejorasPropuestas').value = opt.mejoras_propuestas || '';
+                    document.getElementById('impactoEsperado').value = opt.impacto_esperado || '';
+                    document.getElementById('prioridad').value = opt.prioridad || '';
+                    document.getElementById('estado').value = opt.estado || '';
+                    document.getElementById('accionesImplementadas').value = opt.acciones_implementadas || '';
+                    document.getElementById('fechaImplementacion').value = opt.fecha_implementacion || '';
+                    document.getElementById('resultadosObtenidos').value = opt.resultados_obtenidos || '';
+                    
+                    // Cargar estrategias si hay cliente seleccionado
+                    if (opt.cliente_id) {
+                        await loadStrategiesByClient(opt.cliente_id);
+                        document.getElementById('estrategiaId').value = opt.estrategia_id || '';
+                    }
+                    
+                    // Mostrar/ocultar sección de implementación
+                    const implementationSection = document.getElementById('implementationSection');
+                    if (opt.estado === 'implementada') {
+                        implementationSection.style.display = 'block';
+                    } else {
+                        implementationSection.style.display = 'none';
+                    }
+                    
+                    document.getElementById('optimizationModalTitle').textContent = 'Editar Optimización';
+                    editingOptimizationId = optimizationId;
+                    
+                    new bootstrap.Modal(document.getElementById('optimizationModal')).show();
+                    
+                } else {
+                    throw new Error(result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error loading optimization for edit:', error);
+                showError('Error al cargar los datos de la optimización');
+            }
+        }
+
+        // Cambiar estado de optimización
+        async function changeStatus(optimizationId, newStatus) {
+            try {
+                const optimization = optimizationsData.find(o => o.id === optimizationId);
+                if (!optimization) return;
+                
+                const statusLabels = {
+                    'propuesta': 'propuesta',
+                    'en_progreso': 'en progreso',
+                    'implementada': 'implementada',
+                    'descartada': 'descartada'
+                };
+                
+                const result = await Swal.fire({
+                    title: `¿Cambiar estado a ${statusLabels[newStatus]}?`,
+                    text: `¿Estás seguro de que quieres marcar esta optimización como ${statusLabels[newStatus]}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cambiar',
+                    cancelButtonText: 'Cancelar'
+                });
+                
+                if (result.isConfirmed) {
+                    const updateResult = await api.cambiarEstadoOptimizacion(optimizationId, newStatus);
+                    
+                    if (updateResult.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Estado actualizado',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        
+                        loadOptimizationsData();
+                    } else {
+                        throw new Error(updateResult.message);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error changing status:', error);
+                showError('Error al cambiar el estado de la optimización');
+            }
+        }
+
+        // Mostrar modal de implementación
+        async function showImplementationModal(optimizationId) {
+            try {
+                const result = await api.getOptimizacion(optimizationId);
+                
+                if (result.success) {
+                    const opt = result.data;
+                    
+                    document.getElementById('implementationOptimizationId').value = opt.id;
+                    document.getElementById('implementationTitle').textContent = opt.titulo;
+                    document.getElementById('implementationActions').value = '';
+                    document.getElementById('implementationDate').value = new Date().toISOString().split('T')[0];
+                    document.getElementById('implementationResults').value = '';
+                    
+                    new bootstrap.Modal(document.getElementById('implementationModal')).show();
+                    
+                } else {
+                    throw new Error(result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error loading optimization for implementation:', error);
+                showError('Error al cargar la optimización');
+            }
+        }
+
+        // Marcar como implementada
+        async function markAsImplemented() {
+            try {
+                const form = document.getElementById('implementationForm');
+                const validation = validateForm(form);
+                
+                if (!validation.isValid) {
+                    return;
+                }
+                
+                const optimizationId = document.getElementById('implementationOptimizationId').value;
+                const implementationData = {
+                    resultados: {
+                        acciones_implementadas: document.getElementById('implementationActions').value.trim(),
+                        fecha_implementacion: document.getElementById('implementationDate').value,
+                        resultados_obtenidos: document.getElementById('implementationResults').value.trim()
+                    }
+                };
+                
+                const saveBtn = event.target;
+                const originalText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Implementando...';
+                saveBtn.disabled = true;
+                
+                const result = await api.implementarOptimizacion(optimizationId, implementationData);
+                
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Optimización implementada',
+                        text: result.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    bootstrap.Modal.getInstance(document.getElementById('implementationModal')).hide();
+                    loadOptimizationsData();
+                    
+                } else {
+                    throw new Error(result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error implementing optimization:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Error al implementar la optimización'
+                });
+            } finally {
+                const saveBtn = document.querySelector('#implementationModal .btn-success');
+                saveBtn.innerHTML = '<i class="bi bi-check-circle"></i> Marcar como Implementada';
+                saveBtn.disabled = false;
+            }
+        }
+
+        // Filtrar por estado
+        function filterByStatus(status) {
+            if (!optimizationsDataTable) return;
+            
+            let searchTerm = '';
+            switch (status) {
+                case 'propuesta':
+                    searchTerm = 'Propuesta';
+                    break;
+                case 'en_progreso':
+                    searchTerm = 'En Progreso';
+                    break;
+                case 'implementada':
+                    searchTerm = 'Implementada';
+                    break;
+                case 'descartada':
+                    searchTerm = 'Descartada';
+                    break;
+                default:
+                    searchTerm = '';
+            }
+            
+            optimizationsDataTable.column(3).search(searchTerm).draw();
+        }
+
+        // Filtrar por prioridad
+        function filterByPriority(priority) {
+            if (!optimizationsDataTable) return;
+            
+            let searchTerm = '';
+            switch (priority) {
+                case 'critica':
+                    searchTerm = 'Crítica';
+                    break;
+                case 'alta':
+                    searchTerm = 'Alta';
+                    break;
+                case 'media':
+                    searchTerm = 'Media';
+                    break;
+                case 'baja':
+                    searchTerm = 'Baja';
+                    break;
+                default:
+                    searchTerm = '';
+            }
+            
+            optimizationsDataTable.column(2).search(searchTerm).draw();
+        }
+
+        // Actualizar optimizaciones
+        function refreshOptimizations() {
+            loadOptimizationsData();
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('optimizationForm').reset();
+            document.getElementById('optimizationId').value = '';
+            document.getElementById('optimizationModalTitle').textContent = 'Nueva Optimización';
+            document.getElementById('implementationSection').style.display = 'none';
+            editingOptimizationId = null;
+            
+            // Clear validation errors
+            document.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+        }
+
+        // Event listener for modal reset
+        document.getElementById('optimizationModal').addEventListener('hidden.bs.modal', resetForm);
+
+        // Utility functions
+        function showTableLoading(show) {
+            const loading = document.getElementById('tableLoading');
+            if (loading) {
+                if (show) {
+                    loading.classList.remove('d-none');
+                } else {
+                    loading.classList.add('d-none');
+                }
+            }
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message
+            });
+        }
+
+        function getPriorityClass(priority) {
+            const classes = {
+                'critica': 'critical',
+                'alta': 'high',
+                'media': 'medium',
+                'baja': 'low'
+            };
+            return classes[priority] || 'low';
+        }
+
+        function getPriorityLabel(priority) {
+            const labels = {
+                'critica': 'Crítica',
+                'alta': 'Alta',
+                'media': 'Media',
+                'baja': 'Baja'
+            };
+            return labels[priority] || 'N/A';
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'propuesta': 'proposed',
+                'en_progreso': 'in-progress',
+                'implementada': 'implemented',
+                'descartada': 'discarded'
+            };
+            return classes[status] || 'proposed';
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'propuesta': 'Propuesta',
+                'en_progreso': 'En Progreso',
+                'implementada': 'Implementada',
+                'descartada': 'Descartada'
+            };
+            return labels[status] || 'N/A';
+        }
+
+        function getCountIdFromStatus(status) {
+            const ids = {
+                'propuesta': 'proposed',
+                'en_progreso': 'inProgress',
+                'implementada': 'implemented',
+                'descartada': 'discarded'
+            };
+            return ids[status] || 'proposed';
+        }
+
+        function getIconFromStatus(status) {
+            const icons = {
+                'propuesta': 'lightbulb',
+                'en_progreso': 'clock',
+                'implementada': 'check-circle',
+                'descartada': 'x-circle'
+            };
+            return icons[status] || 'lightbulb';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Initialize search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    if (optimizationsDataTable) {
+                        optimizationsDataTable.search(this.value).draw();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

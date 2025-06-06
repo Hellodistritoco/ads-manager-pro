@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estrategias - ADS Manager Pro 3</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../css/main.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--dark-color) 0%, #334155 100%);
+            color: white;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            margin: 0.25rem 1rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 20px;
+        }
+
+        .top-bar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .breadcrumb {
+            background: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .breadcrumb-item {
+            color: var(--secondary-color);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        /* Page specific styles */
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--secondary-color);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .strategies-table-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .table-header {
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 300px;
+            flex: 1;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+        }
+
+        .table {
+            margin: 0;
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: var(--dark-color);
+            background-color: #f8fafc;
+            padding: 1rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .strategy-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .strategy-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .strategy-details h6 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .strategy-details small {
+            color: var(--secondary-color);
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        /* Modal styles */
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom: none;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .form-floating label {
+            color: var(--secondary-color);
+        }
+
+        .form-select, .form-control {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+        }
+
+        .form-select:focus, .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+
+        /* KPI and Platform tags */
+        .tag-input-container {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0.5rem;
+            min-height: 60px;
+            cursor: text;
+            transition: border-color 0.3s ease;
+        }
+
+        .tag-input-container:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            margin: 0.125rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .tag .remove-tag {
+            margin-left: 0.25rem;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .tag .remove-tag:hover {
+            opacity: 1;
+        }
+
+        .tag-input {
+            border: none;
+            outline: none;
+            margin: 0.125rem;
+            min-width: 100px;
+            background: transparent;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .stats-summary {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .page-header {
+                padding: 1rem;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading states */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--secondary-color);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4 class="mb-0">
+                <i class="bi bi-bullseye"></i> ADS Manager Pro 3
+            </h4>
+            <small class="text-muted">v3.0.0</small>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-item">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="cliente.html" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Clientes</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="estrategia.html" class="nav-link active">
+                    <i class="bi bi-lightbulb"></i>
+                    <span>Estrategias</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="metricas.html" class="nav-link">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Métricas</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="optimizacion.html" class="nav-link">
+                    <i class="bi bi-gear"></i>
+                    <span>Optimización</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="resultados.html" class="nav-link">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Resultados</span>
+                </a>
+            </div>
+            
+            <hr class="my-3 mx-3" style="border-color: rgba(255, 255, 255, 0.2);">
+            
+            <div class="nav-item">
+                <a href="../index.html" class="nav-link">
+                    <i class="bi bi-house"></i>
+                    <span>Inicio</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-secondary d-md-none" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Estrategias</li>
+                    </ol>
+                </nav>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-primary" onclick="refreshStrategies()">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                </button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#strategyModal">
+                    <i class="bi bi-plus-circle"></i> Nueva Estrategia
+                </button>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="container-fluid p-4">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="h3 mb-2">Gestión de Estrategias</h1>
+                        <p class="text-muted mb-0">Crea y gestiona estrategias publicitarias personalizadas para cada cliente</p>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">Total de estrategias: <span id="totalStrategiesCount">--</span></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Summary -->
+            <div class="stats-summary">
+                <div class="stat-card">
+                    <div class="stat-value" id="activeStrategiesCount">--</div>
+                    <div class="stat-label">Estrategias Activas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalBudgetCount">--</div>
+                    <div class="stat-label">Presupuesto Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgPerformanceCount">--</div>
+                    <div class="stat-label">Rendimiento Promedio</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="completedStrategiesCount">--</div>
+                    <div class="stat-label">Estrategias Finalizadas</div>
+                </div>
+            </div>
+
+            <!-- Strategies Table -->
+            <div class="strategies-table-card">
+                <div class="table-header">
+                    <h5 class="mb-0">Lista de Estrategias</h5>
+                    <div class="d-flex gap-3 align-items-center">
+                        <div class="search-box">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="form-control" placeholder="Buscar estrategias..." id="searchInput">
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="bi bi-funnel"></i> Filtrar
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('all')">Todas</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('activa')">Activas</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('pausada')">Pausadas</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByStatus('finalizada')">Finalizadas</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByType('awareness')">Awareness</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByType('conversion')">Conversión</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterByType('retention')">Retención</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive" style="position: relative;">
+                    <div class="loading-overlay d-none" id="tableLoading">
+                        <div class="spinner"></div>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Estrategia</th>
+                                <th>Cliente</th>
+                                <th>Tipo</th>
+                                <th>Presupuesto</th>
+                                <th>Período</th>
+                                <th>Rendimiento</th>
+                                <th>Estado</th>
+                                <th>Fecha Creación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="strategiesTableBody">
+                            <!-- Content will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategy Modal -->
+    <div class="modal fade" id="strategyModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="strategyModalTitle">Nueva Estrategia</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="strategyForm">
+                        <input type="hidden" id="strategyId">
+                        
+                        <div class="row g-3">
+                            <!-- Información Básica -->
+                            <div class="col-12">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-info-circle"></i> Información Básica
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="clienteId" required>
+                                        <option value="">Seleccionar cliente</option>
+                                    </select>
+                                    <label for="clienteId">Cliente *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="nombreEstrategia" required>
+                                    <label for="nombreEstrategia">Nombre de la Estrategia *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="descripcion" style="height: 100px"></textarea>
+                                    <label for="descripcion">Descripción</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="objetivos" style="height: 120px" required></textarea>
+                                    <label for="objetivos">Objetivos de la Estrategia *</label>
+                                </div>
+                            </div>
+
+                            <!-- Configuración de Campaña -->
+                            <div class="col-12 mt-4">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-gear"></i> Configuración de Campaña
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="tipoCampana" required>
+                                        <option value="">Seleccionar tipo</option>
+                                        <option value="awareness">Awareness</option>
+                                        <option value="consideration">Consideración</option>
+                                        <option value="conversion">Conversión</option>
+                                        <option value="retention">Retención</option>
+                                        <option value="loyalty">Fidelización</option>
+                                    </select>
+                                    <label for="tipoCampana">Tipo de Campaña *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="presupuesto" step="0.01" min="0" required>
+                                    <label for="presupuesto">Presupuesto (USD) *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="fechaInicio" required>
+                                    <label for="fechaInicio">Fecha de Inicio *</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="fechaFin">
+                                    <label for="fechaFin">Fecha de Fin</label>
+                                </div>
+                            </div>
+
+                            <!-- KPIs Principales -->
+                            <div class="col-12 mt-4">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-graph-up"></i> KPIs Principales
+                                </h6>
+                                <div class="tag-input-container" id="kpisContainer">
+                                    <input type="text" class="tag-input" id="kpiInput" placeholder="Escribe un KPI y presiona Enter">
+                                </div>
+                                <small class="text-muted">Ejemplos: ROAS, CTR, CPC, Conversiones, etc.</small>
+                            </div>
+
+                            <!-- Plataformas -->
+                            <div class="col-12 mt-3">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-globe"></i> Plataformas
+                                </h6>
+                                <div class="tag-input-container" id="plataformasContainer">
+                                    <input type="text" class="tag-input" id="plataformaInput" placeholder="Escribe una plataforma y presiona Enter">
+                                </div>
+                                <small class="text-muted">Ejemplos: Google Ads, Facebook Ads, Instagram, YouTube, etc.</small>
+                            </div>
+
+                            <!-- Audiencia Objetivo -->
+                            <div class="col-12 mt-4">
+                                <h6 class="mb-3 text-primary">
+                                    <i class="bi bi-people"></i> Audiencia Objetivo
+                                </h6>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="audienciaObjetivo" style="height: 100px"></textarea>
+                                    <label for="audienciaObjetivo">Descripción de la Audiencia Objetivo</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveStrategy()">
+                        <i class="bi bi-check-circle"></i> Guardar Estrategia
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Variables globales
+        let strategiesData = [];
+        let clientsData = [];
+        let editingStrategyId = null;
+        let kpiTags = [];
+        let plataformaTags = [];
+
+        // API Client simplificado
+        const api = {
+            baseUrl: '../api/',
+            
+            async getEstrategias() {
+                try {
+                    const response = await fetch(`${this.baseUrl}estrategias`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener estrategias:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async getEstrategia(id) {
+                try {
+                    const response = await fetch(`${this.baseUrl}estrategias/${id}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener estrategia:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async getClientes() {
+                try {
+                    const response = await fetch(`${this.baseUrl}clientes`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al obtener clientes:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async createEstrategia(data) {
+                try {
+                    const response = await fetch(`${this.baseUrl}estrategias`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al crear estrategia:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async updateEstrategia(id, data) {
+                try {
+                    const response = await fetch(`${this.baseUrl}estrategias/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al actualizar estrategia:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async deleteEstrategia(id) {
+                try {
+                    const response = await fetch(`${this.baseUrl}estrategias/${id}`, {
+                        method: 'DELETE'
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al eliminar estrategia:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            },
+
+            async cambiarEstadoEstrategia(id, estado) {
+                try {
+                    const response = await fetch(`${this.baseUrl}estrategias/${id}/cambiar-estado`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ estado })
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error al cambiar estado:', error);
+                    return { success: false, message: 'Error de conexión' };
+                }
+            }
+        };
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSidebar();
+            loadStrategiesData();
+            initializeSearch();
+            setupTagInputs();
+            setupFormValidation();
+        });
+
+        // Sidebar functionality
+        function initializeSidebar() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                        sidebar.classList.remove('show');
+                    }
+                }
+            });
+        }
+
+        // Cargar datos de estrategias
+        async function loadStrategiesData() {
+            try {
+                showTableLoading(true);
+                
+                const [strategiesResponse, clientsResponse] = await Promise.all([
+                    api.getEstrategias(),
+                    api.getClientes()
+                ]);
+                
+                if (strategiesResponse.success) {
+                    strategiesData = strategiesResponse.data;
+                    updateStatsCards();
+                    renderStrategiesTable();
+                }
+                
+                if (clientsResponse.success) {
+                    clientsData = clientsResponse.data;
+                    populateClientsSelect();
+                }
+                
+            } catch (error) {
+                console.error('Error loading strategies:', error);
+                showError('Error al cargar las estrategias');
+                renderEmptyState();
+            } finally {
+                showTableLoading(false);
+            }
+        }
+
+        // Actualizar tarjetas de estadísticas
+        function updateStatsCards() {
+            const activeStrategies = strategiesData.filter(s => s.estado === 'activa').length;
+            const totalBudget = strategiesData.reduce((sum, s) => sum + (parseFloat(s.presupuesto) || 0), 0);
+            const completedStrategies = strategiesData.filter(s => s.estado === 'finalizada').length;
+            const avgPerformance = strategiesData.length > 0 ? 
+                strategiesData.reduce((sum, s) => sum + (parseFloat(s.roas_promedio) || 0), 0) / strategiesData.length : 0;
+
+            document.getElementById('totalStrategiesCount').textContent = strategiesData.length;
+            document.getElementById('activeStrategiesCount').textContent = activeStrategies;
+            document.getElementById('totalBudgetCount').textContent = formatCurrency(totalBudget);
+            document.getElementById('avgPerformanceCount').textContent = formatNumber(avgPerformance, 2) + 'x';
+            document.getElementById('completedStrategiesCount').textContent = completedStrategies;
+        }
+
+        // Poblar select de clientes
+        function populateClientsSelect() {
+            const select = document.getElementById('clienteId');
+            select.innerHTML = '<option value="">Seleccionar cliente</option>';
+            
+            clientsData.filter(c => c.activo).forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = `${client.nombre} ${client.empresa ? '- ' + client.empresa : ''}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Renderizar tabla de estrategias
+        function renderStrategiesTable() {
+            const tbody = document.getElementById('strategiesTableBody');
+            
+            if (strategiesData.length === 0) {
+                renderEmptyState();
+                return;
+            }
+            
+            tbody.innerHTML = strategiesData.map(strategy => `
+                <tr>
+                    <td>
+                        <div class="strategy-info">
+                            <div class="strategy-icon">
+                                <i class="bi bi-lightbulb"></i>
+                            </div>
+                            <div class="strategy-details">
+                                <h6>${strategy.nombre_estrategia}</h6>
+                                <small>${strategy.descripcion || 'Sin descripción'}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <div class="fw-bold">${strategy.cliente_nombre || 'N/A'}</div>
+                            <small class="text-muted">${strategy.cliente_empresa || ''}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge ${getTypeBadgeClass(strategy.tipo_campana)}">${getTypeLabel(strategy.tipo_campana)}</span>
+                    </td>
+                    <td>${formatCurrency(strategy.presupuesto || 0)}</td>
+                    <td>
+                        <div>
+                            <small class="text-muted">Inicio:</small> ${formatDate(strategy.fecha_inicio)}<br>
+                            ${strategy.fecha_fin ? `<small class="text-muted">Fin:</small> ${formatDate(strategy.fecha_fin)}` : '<small class="text-muted">Sin fecha fin</small>'}
+                        </div>
+                    </td>
+                    <td>
+                        ${strategy.roas_promedio ? 
+                            `<span class="fw-bold ${getRoasColor(strategy.roas_promedio)}">${formatNumber(strategy.roas_promedio, 2)}x ROAS</span>` : 
+                            '<span class="text-muted">Sin datos</span>'
+                        }
+                    </td>
+                    <td>${getStatusBadge(strategy.estado)}</td>
+                    <td>${formatDate(strategy.fecha_creacion)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewStrategy(${strategy.id})" title="Ver detalles">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="editStrategy(${strategy.id})" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Cambiar estado">
+                                    <i class="bi bi-gear"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="changeStrategyStatus(${strategy.id}, 'activa')">Activar</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="changeStrategyStatus(${strategy.id}, 'pausada')">Pausar</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="changeStrategyStatus(${strategy.id}, 'finalizada')">Finalizar</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteStrategy(${strategy.id})">Eliminar</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Renderizar estado vacío
+        function renderEmptyState() {
+            const tbody = document.getElementById('strategiesTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9">
+                        <div class="empty-state">
+                            <i class="bi bi-lightbulb"></i>
+                            <h5>No hay estrategias registradas</h5>
+                            <p>Comienza creando tu primera estrategia publicitaria para gestionar las campañas de tus clientes</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#strategyModal">
+                                <i class="bi bi-plus-circle"></i> Crear Primera Estrategia
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Configurar inputs de tags
+        function setupTagInputs() {
+            setupTagInput('kpiInput', 'kpisContainer', kpiTags);
+            setupTagInput('plataformaInput', 'plataformasContainer', plataformaTags);
+        }
+
+        // Configurar input de tag individual
+        function setupTagInput(inputId, containerId, tagsArray) {
+            const input = document.getElementById(inputId);
+            const container = document.getElementById(containerId);
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const value = this.value.trim();
+                    
+                    if (value && !tagsArray.includes(value)) {
+                        tagsArray.push(value);
+                        addTagToContainer(container, value, tagsArray);
+                        this.value = '';
+                    }
+                }
+            });
+
+            input.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value && !tagsArray.includes(value)) {
+                    tagsArray.push(value);
+                    addTagToContainer(container, value, tagsArray);
+                    this.value = '';
+                }
+            });
+        }
+
+        // Agregar tag al contenedor
+        function addTagToContainer(container, value, tagsArray) {
+            const tagElement = document.createElement('span');
+            tagElement.className = 'tag';
+            tagElement.innerHTML = `
+                ${value}
+                <span class="remove-tag" onclick="removeTag(this, '${value}', ${tagsArray === kpiTags ? 'kpiTags' : 'plataformaTags'})">&times;</span>
+            `;
+            
+            const input = container.querySelector('.tag-input');
+            container.insertBefore(tagElement, input);
+        }
+
+        // Remover tag
+        function removeTag(element, value, arrayName) {
+            const tagsArray = arrayName === 'kpiTags' ? kpiTags : plataformaTags;
+            const index = tagsArray.indexOf(value);
+            if (index > -1) {
+                tagsArray.splice(index, 1);
+            }
+            element.parentElement.remove();
+        }
+
+        // Inicializar búsqueda
+        function initializeSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                const term = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#strategiesTableBody tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(term) ? '' : 'none';
+                });
+            });
+        }
+
+        // Configurar validación de formulario
+        function setupFormValidation() {
+            const form = document.getElementById('strategyForm');
+            
+            // Validación de fechas
+            const fechaInicio = document.getElementById('fechaInicio');
+            const fechaFin = document.getElementById('fechaFin');
+            
+            fechaInicio.addEventListener('change', function() {
+                if (fechaFin.value && this.value > fechaFin.value) {
+                    fechaFin.value = '';
+                }
+                fechaFin.min = this.value;
+            });
+
+            fechaFin.addEventListener('change', function() {
+                if (fechaInicio.value && this.value < fechaInicio.value) {
+                    this.value = '';
+                    alert('La fecha de fin debe ser posterior a la fecha de inicio');
+                }
+            });
+        }
+
+        // Guardar estrategia
+        async function saveStrategy() {
+            try {
+                const form = document.getElementById('strategyForm');
+                
+                // Validar formulario
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                
+                // Preparar datos
+                const strategyData = {
+                    cliente_id: document.getElementById('clienteId').value,
+                    nombre_estrategia: document.getElementById('nombreEstrategia').value.trim(),
+                    descripcion: document.getElementById('descripcion').value.trim(),
+                    objetivos: document.getElementById('objetivos').value.trim(),
+                    tipo_campana: document.getElementById('tipoCampana').value,
+                    presupuesto: parseFloat(document.getElementById('presupuesto').value) || 0,
+                    fecha_inicio: document.getElementById('fechaInicio').value,
+                    fecha_fin: document.getElementById('fechaFin').value || null,
+                    audiencia_objetivo: document.getElementById('audienciaObjetivo').value.trim(),
+                    kpis_principales: kpiTags.length > 0 ? kpiTags : null,
+                    plataformas: plataformaTags.length > 0 ? plataformaTags : null
+                };
+                
+                // Mostrar loading
+                const saveBtn = event.target;
+                const originalText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+                saveBtn.disabled = true;
+                
+                // API call
+                let result;
+                if (editingStrategyId) {
+                    result = await api.updateEstrategia(editingStrategyId, strategyData);
+                } else {
+                    result = await api.createEstrategia(strategyData);
+                }
+                
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: editingStrategyId ? 'Estrategia actualizada' : 'Estrategia creada',
+                        text: result.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    bootstrap.Modal.getInstance(document.getElementById('strategyModal')).hide();
+                    loadStrategiesData();
+                    resetForm();
+                } else {
+                    throw new Error(result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error saving strategy:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Error al guardar la estrategia'
+                });
+            } finally {
+                const saveBtn = document.querySelector('#strategyModal .btn-primary');
+                saveBtn.innerHTML = '<i class="bi bi-check-circle"></i> Guardar Estrategia';
+                saveBtn.disabled = false;
+            }
+        }
+
+        // Ver detalles de estrategia
+        async function viewStrategy(strategyId) {
+            try {
+                const result = await api.getEstrategia(strategyId);
+                
+                if (result.success) {
+                    const strategy = result.data;
+                    
+                    // Parse KPIs y plataformas
+                    const kpis = strategy.kpis_principales ? 
+                        (typeof strategy.kpis_principales === 'string' ? 
+                            JSON.parse(strategy.kpis_principales) : strategy.kpis_principales) : [];
+                    
+                    const plataformas = strategy.plataformas ? 
+                        (typeof strategy.plataformas === 'string' ? 
+                            JSON.parse(strategy.plataformas) : strategy.plataformas) : [];
+                    
+                    Swal.fire({
+                        title: strategy.nombre_estrategia,
+                        html: `
+                            <div class="text-start">
+                                <h6>Información General</h6>
+                                <p><strong>Cliente:</strong> ${strategy.cliente_nombre} ${strategy.cliente_empresa ? '- ' + strategy.cliente_empresa : ''}</p>
+                                <p><strong>Tipo:</strong> ${getTypeLabel(strategy.tipo_campana)}</p>
+                                <p><strong>Presupuesto:</strong> ${formatCurrency(strategy.presupuesto)}</p>
+                                <p><strong>Período:</strong> ${formatDate(strategy.fecha_inicio)} ${strategy.fecha_fin ? '- ' + formatDate(strategy.fecha_fin) : '(Sin fecha fin)'}</p>
+                                <p><strong>Estado:</strong> ${getStatusLabel(strategy.estado)}</p>
+                                
+                                <hr>
+                                <h6>Objetivos</h6>
+                                <p>${strategy.objetivos || 'Sin objetivos definidos'}</p>
+                                
+                                ${strategy.descripcion ? `
+                                    <hr>
+                                    <h6>Descripción</h6>
+                                    <p>${strategy.descripcion}</p>
+                                ` : ''}
+                                
+                                ${kpis.length > 0 ? `
+                                    <hr>
+                                    <h6>KPIs Principales</h6>
+                                    <p>${kpis.join(', ')}</p>
+                                ` : ''}
+                                
+                                ${plataformas.length > 0 ? `
+                                    <hr>
+                                    <h6>Plataformas</h6>
+                                    <p>${plataformas.join(', ')}</p>
+                                ` : ''}
+                                
+                                ${strategy.audiencia_objetivo ? `
+                                    <hr>
+                                    <h6>Audiencia Objetivo</h6>
+                                    <p>${strategy.audiencia_objetivo}</p>
+                                ` : ''}
+                                
+                                ${strategy.rendimiento ? `
+                                    <hr>
+                                    <h6>Rendimiento</h6>
+                                    <div class="row g-2">
+                                        <div class="col-6"><strong>Inversión:</strong> ${formatCurrency(strategy.rendimiento.inversion_real || 0)}</div>
+                                        <div class="col-6"><strong>Ingresos:</strong> ${formatCurrency(strategy.rendimiento.ingresos_generados || 0)}</div>
+                                        <div class="col-6"><strong>ROAS:</strong> ${formatNumber(strategy.rendimiento.roas_promedio || 0, 2)}x</div>
+                                        <div class="col-6"><strong>Reportes:</strong> ${strategy.rendimiento.total_reportes || 0}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `,
+                        width: 700,
+                        showConfirmButton: false,
+                        showCloseButton: true,
+                        footer: `
+                            <button class="btn btn-primary me-2" onclick="editStrategy(${strategyId}); Swal.close();">
+                                <i class="bi bi-pencil"></i> Editar
+                            </button>
+                            <a href="metricas.html?estrategia=${strategyId}" class="btn btn-outline-primary">
+                                <i class="bi bi-bar-chart"></i> Ver Métricas
+                            </a>
+                        `
+                    });
+                } else {
+                    throw new Error(result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error viewing strategy:', error);
+                showError('Error al cargar los detalles de la estrategia');
+            }
+        }
+
+        // Editar estrategia
+        async function editStrategy(strategyId) {
+            try {
+                const result = await api.getEstrategia(strategyId);
+                
+                if (result.success) {
+                    const strategy = result.data;
+                    
+                    // Llenar formulario
+                    document.getElementById('strategyId').value = strategy.id;
+                    document.getElementById('clienteId').value = strategy.cliente_id || '';
+                    document.getElementById('nombreEstrategia').value = strategy.nombre_estrategia || '';
+                    document.getElementById('descripcion').value = strategy.descripcion || '';
+                    document.getElementById('objetivos').value = strategy.objetivos || '';
+                    document.getElementById('tipoCampana').value = strategy.tipo_campana || '';
+                    document.getElementById('presupuesto').value = strategy.presupuesto || '';
+                    document.getElementById('fechaInicio').value = strategy.fecha_inicio || '';
+                    document.getElementById('fechaFin').value = strategy.fecha_fin || '';
+                    document.getElementById('audienciaObjetivo').value = strategy.audiencia_objetivo || '';
+                    
+                    // Cargar KPIs
+                    kpiTags.length = 0;
+                    if (strategy.kpis_principales) {
+                        const kpis = typeof strategy.kpis_principales === 'string' ? 
+                            JSON.parse(strategy.kpis_principales) : strategy.kpis_principales;
+                        kpis.forEach(kpi => {
+                            kpiTags.push(kpi);
+                            addTagToContainer(document.getElementById('kpisContainer'), kpi, kpiTags);
+                        });
+                    }
+                    
+                    // Cargar Plataformas
+                    plataformaTags.length = 0;
+                    if (strategy.plataformas) {
+                        const plataformas = typeof strategy.plataformas === 'string' ? 
+                            JSON.parse(strategy.plataformas) : strategy.plataformas;
+                        plataformas.forEach(plataforma => {
+                            plataformaTags.push(plataforma);
+                            addTagToContainer(document.getElementById('plataformasContainer'), plataforma, plataformaTags);
+                        });
+                    }
+                    
+                    // Actualizar título del modal
+                    document.getElementById('strategyModalTitle').textContent = 'Editar Estrategia';
+                    editingStrategyId = strategyId;
+                    
+                    // Mostrar modal
+                    new bootstrap.Modal(document.getElementById('strategyModal')).show();
+                    
+                } else {
+                    throw new Error(result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error loading strategy for edit:', error);
+                showError('Error al cargar los datos de la estrategia');
+            }
+        }
+
+        // Cambiar estado de estrategia
+        async function changeStrategyStatus(strategyId, newStatus) {
+            try {
+                const strategy = strategiesData.find(s => s.id === strategyId);
+                if (!strategy) return;
+                
+                const statusLabels = {
+                    'activa': 'activar',
+                    'pausada': 'pausar',
+                    'finalizada': 'finalizar'
+                };
+                
+                const result = await Swal.fire({
+                    title: `¿${statusLabels[newStatus].charAt(0).toUpperCase() + statusLabels[newStatus].slice(1)} estrategia?`,
+                    text: `¿Estás seguro de que quieres ${statusLabels[newStatus]} esta estrategia?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: `Sí, ${statusLabels[newStatus]}`,
+                    cancelButtonText: 'Cancelar'
+                });
+                
+                if (result.isConfirmed) {
+                    const updateResult = await api.cambiarEstadoEstrategia(strategyId, newStatus);
+                    
+                    if (updateResult.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: `Estrategia ${statusLabels[newStatus]}da`,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        
+                        loadStrategiesData();
+                    } else {
+                        throw new Error(updateResult.message);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error changing strategy status:', error);
+                showError('Error al cambiar el estado de la estrategia');
+            }
+        }
+
+        // Eliminar estrategia
+        async function deleteStrategy(strategyId) {
+            try {
+                const result = await Swal.fire({
+                    title: '¿Eliminar estrategia?',
+                    text: 'Esta acción no se puede deshacer',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#dc2626'
+                });
+                
+                if (result.isConfirmed) {
+                    const deleteResult = await api.deleteEstrategia(strategyId);
+                    
+                    if (deleteResult.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Estrategia eliminada',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        
+                        loadStrategiesData();
+                    } else {
+                        throw new Error(deleteResult.message);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error deleting strategy:', error);
+                showError('Error al eliminar la estrategia');
+            }
+        }
+
+        // Filtros
+        function filterByStatus(status) {
+            const rows = document.querySelectorAll('#strategiesTableBody tr');
+            
+            rows.forEach(row => {
+                if (status === 'all') {
+                    row.style.display = '';
+                } else {
+                    const statusCell = row.querySelector('td:nth-child(7)');
+                    const hasStatus = statusCell && statusCell.textContent.toLowerCase().includes(getStatusLabel(status).toLowerCase());
+                    row.style.display = hasStatus ? '' : 'none';
+                }
+            });
+        }
+
+        function filterByType(type) {
+            const rows = document.querySelectorAll('#strategiesTableBody tr');
+            
+            rows.forEach(row => {
+                const typeCell = row.querySelector('td:nth-child(3)');
+                const hasType = typeCell && typeCell.textContent.toLowerCase().includes(getTypeLabel(type).toLowerCase());
+                row.style.display = hasType ? '' : 'none';
+            });
+        }
+
+        // Actualizar estrategias
+        function refreshStrategies() {
+            loadStrategiesData();
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('strategyForm').reset();
+            document.getElementById('strategyId').value = '';
+            document.getElementById('strategyModalTitle').textContent = 'Nueva Estrategia';
+            editingStrategyId = null;
+            
+            // Limpiar tags
+            kpiTags.length = 0;
+            plataformaTags.length = 0;
+            
+            // Limpiar contenedores de tags
+            const kpisContainer = document.getElementById('kpisContainer');
+            const plataformasContainer = document.getElementById('plataformasContainer');
+            
+            kpisContainer.querySelectorAll('.tag').forEach(tag => tag.remove());
+            plataformasContainer.querySelectorAll('.tag').forEach(tag => tag.remove());
+        }
+
+        // Event listener for modal reset
+        document.getElementById('strategyModal').addEventListener('hidden.bs.modal', resetForm);
+
+        // Utility functions
+        function showTableLoading(show) {
+            const loading = document.getElementById('tableLoading');
+            if (show) {
+                loading.classList.remove('d-none');
+            } else {
+                loading.classList.add('d-none');
+            }
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message
+            });
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'planificada': '<span class="badge bg-secondary">Planificada</span>',
+                'activa': '<span class="badge bg-success">Activa</span>',
+                'pausada': '<span class="badge bg-warning">Pausada</span>',
+                'finalizada': '<span class="badge bg-primary">Finalizada</span>'
+            };
+            return badges[status] || '<span class="badge bg-secondary">Sin estado</span>';
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'planificada': 'Planificada',
+                'activa': 'Activa',
+                'pausada': 'Pausada',
+                'finalizada': 'Finalizada'
+            };
+            return labels[status] || 'Sin estado';
+        }
+
+        function getTypeBadgeClass(type) {
+            const classes = {
+                'awareness': 'bg-info',
+                'consideration': 'bg-primary',
+                'conversion': 'bg-success',
+                'retention': 'bg-warning',
+                'loyalty': 'bg-danger'
+            };
+            return classes[type] || 'bg-secondary';
+        }
+
+        function getTypeLabel(type) {
+            const labels = {
+                'awareness': 'Awareness',
+                'consideration': 'Consideración',
+                'conversion': 'Conversión',
+                'retention': 'Retención',
+                'loyalty': 'Fidelización'
+            };
+            return labels[type] || 'Sin tipo';
+        }
+
+        function getRoasColor(roas) {
+            if (roas >= 4) return 'text-success';
+            if (roas >= 2) return 'text-primary';
+            if (roas >= 1) return 'text-warning';
+            return 'text-danger';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function formatNumber(number, decimals = 0) {
+            return new Intl.NumberFormat('es-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }).format(number);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    </script>
+</body>
+</html>
